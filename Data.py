@@ -28,7 +28,7 @@ class Source:
 			try:
 				source_obj=source_config[atype]( source,preparator  )
 				data.append( source.obj.data )
-			except KeyError (atype): 
+			except KeyError (atype, source): 
 				print( 'not a valid Data type: ',atype,' file ',source,'skipped' )
 			finally:
 				next
@@ -53,13 +53,8 @@ class AbstractInput:
 # 1. punc+\s*+CAP = ok.
 # 2. abbrev. + punc + [ normal: non boundary, CAP: boundary ]
 ###  sub elements
-        punctuation='\.+|\.*[!?][\s\w]|!+|\?+'
-    	rm_wsnoise=re.compile('\n|\s+|')
-        spacify_punctuation=re.compile(punctuation)
-        string=spacify_punctuation.sub(' ',string)
-		string=rm_wsnoise.sub('',string)
-		return re.split(' ',string)
-
+# it may go into an interative pattern : call it with a pattern and get an array
+    
 
 class TxtInput(AbstractSource):
 	"""Load a txt file"""
