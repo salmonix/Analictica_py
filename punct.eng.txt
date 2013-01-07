@@ -1,0 +1,36 @@
+1.we know the list of punctuation marks. Punctuation is used in writing to
+give impression of stops in talking. However, it does not necessarily mean
+'sentence'.
+
+2.we must provide abbreviation rules. These are named entities.
+    a. store in a databank
+    b. apply some heuristics ( eg. all-caps, pile of consonants. )
+        -> make candidate list to improve databank.
+    The order might be applying heuristic first. -> see: hunsen
+
+3. There is no sign w/o ambiguity. Every stop must be checked against possible
+role of abbreviation.
+
+4. obviously multisemantic punct. marks:
+    ... : may introduce a new sentence or adds an addition.
+    'I like the cream ... and the milk.'
+    'I think, it is fine.' vs. 'I see the plots, the dogs and the cats.'
+
+    Possible solution: separate the two, conjunct with 'AND' and repeat the last VP. :-)
+    Basicall if something is governed by the same VP it belongs together...
+
+    Problem: English does not use extensive puntuations.
+    Probles: VP is not always obvious.
+
+But to do that we need VP rules. To get VP rules we need sentences...
+Machine learning should solve this bootstrapping, but can't, because it lacks
+the relevance field.
+
+Two phases should go:
+
+a. formal way, splitting _everywhere_.
+b. parsing for VP, then starting to move. If VP is not found after a stop, the
+    previous VP applies. If found - it is a new sentence.
+    To do that we need a VP trie or some other HASH structure to store the
+    words according to the character of the language. We must store 6000
+    verbs.
