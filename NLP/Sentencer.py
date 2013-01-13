@@ -11,7 +11,7 @@ class Sentencer:
     def __init__( self, sentencer='punct', language='english' ):
 
         languages=['english']
-        if languages[ language ]:
+        if language in languages:
             self.language = language
         else:
             raise ValueError('Language "',langauge,'" not implemented')
@@ -24,7 +24,7 @@ class Sentencer:
 
         self.data = []
 
-    def process( self, string ): # it should be a factory
+    def process( self, string ):
         """ Takes a string and processes it. Returns a list of sentences"""
 
         rm_noise = re.compile('\s+')
@@ -33,4 +33,5 @@ class Sentencer:
         e = self.data.pop()
         e = normal_punct( e )
         e = rm_noise.sub( ' ',e )
+        # make a factory here using self.sentencer
         return sent_tokenize(e)

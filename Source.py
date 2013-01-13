@@ -8,7 +8,10 @@ class Source:
     def __init__(self,language='en', sentencer=' '):
         self.lang=language
         self.data=[]
+
     def read_data(self,**kwarg):
+        """Takes a hash of { source : type }
+    Returns an iterator of ( source_name, data entry split to sentences )"""
         sentencer=NLP.Sentencer( self.sentencer, self.language )
 # hash has no iteritems or so...
         iter_sources=kwarg.iteritems()
@@ -18,6 +21,7 @@ class Source:
 # source_config contains the module that is called
 # it returns a data string
                 string=source_config[atype]( source  )
+                yield (source, sentencer.process( string ))
 			except KeyError (atype, source): 
 				print( 'not a valid Data type: ',atype,' file ',source,'skipped' )
 			finally:
@@ -26,6 +30,7 @@ class Source:
 
 # abstract parent class for all data sources
 # NOTE: it seems that we are not using it here so it seems to be obsolete
+# I dunno what I wanted with it
 class AbstractInput:
 	def get_items(self, consume=None):
 		"""Returns an advancing iterator for data. 
@@ -44,8 +49,8 @@ class AbstractInput:
                 yield self.data.pop()
 
     def _switch_consume(self,consume):
-        if bool(consume) is True:
-            if bool(self.consume) is False:
+        if bool(consume) is T rue:
+            if bool(self.consu me) is False:
                 self.data.reverse()
                 self.consume = True
         if bool(consume) is False:
