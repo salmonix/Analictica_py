@@ -1,24 +1,26 @@
-class Text_container:
-    """Text container: stores the text transformed into sequences of token index numbers."""
+import array
+
+class Textlist:
+    """Text container: stores the text transformed into sequences of token index numbers.
+    """
     def __init__(self):
-        self.text=[]
-        self.pos=0
+        self.text={}
+        self.active=''
 
-    def next_unit(self):
-    # append only if the actual position is filled
-        if self.text[ self.pos ] and len( self.text ):
-            self.text.append([])
-            self.pos  +=1
+    def text(self, source):
+        """Start a new text unit."""
+        if self.text[source]:
+            return self.text[source]
 
-    def prev_unit(self):
-        self.pos -= 1
+        self.text[source] = array.array('L') # we use long ints
+        self.active = source
 
-    def append_token(self,token):
-        self.text[ self.pos ].append( token )
+    def add_token_idx(self,idx):
+         self.text[ self.pos ].append(idx)
 
-    def return_text(self,Tokens=None):
-    """returns the text using the reference list ( Tokens object ) if any."""
-        pass
-
-# TODO: we need to store - and also pass - the source name
-# because later we may want to retrieve it
+    def get_text(self,text=[]):
+        """Returns a title, text_array tuple for the given text titles. If nothing is passed returns for all."""
+        if text == []:
+            text = self.text.keys()
+            for i in text:
+                yield (i, self.text[i])

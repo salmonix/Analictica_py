@@ -5,21 +5,23 @@ import re
 # XXX we take only one file at once but we may have a full list
 class Source:
     source_config={ 'text': Txt }
-    def __init__(self,language='en', sentencer=' '):
+    def __init__(self,language='en', sentencer='default'):
         self.lang=language
         self.data=[]
 
     def read_data(self,**kwarg):
         """Takes a hash of { source : type }
     Returns an iterator of ( source_name, data entry split to sentences )"""
-        sentencer=NLP.Sentencer( self.sentencer, self.language )
+        if self.sentencer == 'default' 
+            sentencer=NLP.Sentencer( self.sentencer, self.language )
 # hash has no iteritems or so...
         iter_sources=kwarg.iteritems()
 
         while source,atype=iter_sources.next():
+            atype = atype.lower()
 			try:
 # source_config contains the module that is called
-# it returns a data string
+# it returns a data string split into sentences
                 string=source_config[atype]( source  )
                 yield (source, sentencer.process( string ))
 			except KeyError (atype, source): 
