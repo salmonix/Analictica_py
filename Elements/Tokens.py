@@ -1,6 +1,7 @@
-input re
+import re
+import NLP.Tokenizer
 
-class Token_container:
+class Tokens:
     """ Container for the tokens, the nodes. Token container is not optimal for deletion. """
     def __init__( self ):
         self.active = []
@@ -10,13 +11,14 @@ class Token_container:
         self.tokens = [{}]   # token id -> id, token
         self.names = {}   # name -> id
 
-
     def add_token( self, data ):
-    """ Takes a string or list and creates a token. Returns the index number for the token. """
+    """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
         if isinstance(  data, str ):
-            self._add_token( data )
+            return self._add_token( data )
         elif isinstance( data, list ):
-            map( self._add_token( name ), data )
+            idxs = []
+            for i in list:
+                idsx.append( self._add_token( i ) )
 
     # here we should implement the case when a token is a superclass
     # because it may change the number of tokens

@@ -1,6 +1,5 @@
 import NLP
-import Elements.Texts
-import Element.Tokenlist
+import Elements
 
 # get what I want to read from
 data = { 'test' : 'txt' } 
@@ -10,17 +9,11 @@ data = { 'test' : 'txt' }
 source = Source()
 source_iterator = source.read_data( data )
 
-tokens = Elements.Tokenlist()
-texts = Elements.Textlist
-
-# tokenize it ( a parameter can be a filter object to sort out noise )
-# tokenizer = NLP.Tokenizer( )
-
+elements = Elements()
 while title, data = source_iterator.next():
     texts.text(source)
-    data = tokenizer.process(data)
     for i in data:
-        text.add_token_idx( tokenizer.add_token( i ) )
+        text.add_token_idx( tokenizer.add_token( data ) )
 
 
 # make transform module -> from the token hash to create frequency and other tables and stats

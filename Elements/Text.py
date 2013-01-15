@@ -16,11 +16,11 @@ class Textlist:
         self.active = source
 
     def add_token_idx(self,idx):
-         self.text[ self.pos ].append(idx)
+         self.text[ self.active ].append(idx)
 
     def get_text(self,text=[]):
         """Returns a title, text_array tuple for the given text titles. If nothing is passed returns for all."""
-        if text == []:
+        if text == []:   # this is perlish because we can make it an iterator on hash which might be better
             text = self.text.keys()
             for i in text:
                 yield (i, self.text[i])
