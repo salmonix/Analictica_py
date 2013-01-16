@@ -5,6 +5,7 @@ import NLP.Tokenizer
 import NLP.Stopwords
 
 class Elements:
+    """Object containing obj.tokens and obj.texts with some additional convenience methods on the top."""
     def __init__(self,sentencer='', tokenizer=' ', language='', stopwords='' ):
         self.sentencer = NLP.Sentencer( sentencer, language )
         self.tokenizer = NLP.Tokenize( tokenizer, language )
@@ -15,10 +16,10 @@ class Elements:
             self.stopwords = NLP.Stopwords( stopwords )
 
     def add_data(self, source, sentence ):
+        """Convenience method to process a sentence into the text and token containers."""
         tokens=self.tokenizer.tokenize(sentence)
-        self.tokens.add_token(tokens) # we need the returned value of idxs for texts
         self.texts.text( source )
-        self.texts.add_token_idx( idxs )
+        self.texts.add_token_idx( self.token.add_token(tokens) )
 
 # TODO: decide on the interface. Perhaps asking for the texts and tokens object when
 # those are acting separate, and writing the convenience methods here only. But that looks 

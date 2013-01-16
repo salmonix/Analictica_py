@@ -1,5 +1,6 @@
 import NLP
 import Elements
+import Source
 
 # get what I want to read from
 data = { 'test' : 'txt' } 
@@ -10,7 +11,7 @@ source = Source()
 source_iterator = source.read_data( data )
 
 elements = Elements()
-while title, data = source_iterator.next():
+for title, data in source_iterator():
     texts.text(source)
     for i in data:
         text.add_token_idx( tokenizer.add_token( data ) )

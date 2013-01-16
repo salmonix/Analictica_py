@@ -24,7 +24,7 @@ class Sentencer:
         sentencers=['punct']
         if sentencers.index[sentencer]:
             if sentencer == 'punct':
-                sefl.sentencer = nltk.data.load('tokenizers/punkt/'.language.'.pickle')
+                sefl.sentencer = nltk.data.load('tokenizers/punkt/'+language+'.pickle')
 
         else:
             raise ValueError('Sentencer: "',sentencer,'" not implemented')
