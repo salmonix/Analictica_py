@@ -1,5 +1,5 @@
 import re
-from nltk.tokenize.punk import PunktWordTokenizer
+from nltk.tokenize.punkt import PunktWordTokenizer
 
 class Tokenizer:
     def __init__(self, tokenizer='PunktWord', stopwords=''):

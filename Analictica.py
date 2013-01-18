@@ -1,6 +1,14 @@
 import NLP
-import Elements
+import Data.Elements
 import Source
+
+# environment sanity check
+import sys
+
+if sys.version_info >= (3,0):
+    print ('NLTK at the moment runs with the version 2.x')
+    sys.exit(1)
+    
 
 # get what I want to read from
 data = { 'test' : 'txt' } 
@@ -10,7 +18,7 @@ data = { 'test' : 'txt' }
 source = Source()
 source_iterator = source.read_data( data )
 
-elements = Elements()
+elements = Data.Elements()
 for title, data in source_iterator():
     texts.text(source)
     for i in data:

@@ -1,10 +1,8 @@
 import re
 import nltk.data
 
-# the punkt algorithm understands the pattern: ... VP
-# the algorithm does not understand the pattern: , ... NP etc.
-# I have not checked the abbreviations.
-from nltk.tokenize import sent_tokenize
+# This sentence splitting is unclear and badly designed
+from nltk.tokenize import sent_tokenize # this is the regexp based tokenizer
 
 class Sentencer:
     # this is a factory like part. It may go into different factory classes if needed
@@ -23,7 +21,7 @@ class Sentencer:
         # initialize the sentencer
         sentencers=['punct']
         if sentencers.index[sentencer]:
-            if sentencer == 'punct':
+            if sentencer == 'punct':  # here we load the picke learner.
                 sefl.sentencer = nltk.data.load('tokenizers/punkt/'+language+'.pickle')
 
         else:

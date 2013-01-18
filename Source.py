@@ -3,7 +3,7 @@ import re
 import NLP.Sentencer
 
 # XXX we take only one file at once but we may have a full list
-class Source(object):
+class Source:
 
     source_config={ 'text': 'TxtInput' }
 
@@ -32,7 +32,7 @@ class Source(object):
                 next
 
 
-class TxtInput(object):
+class TxtInput:
     """Load  a txt file"""
     def __init__(self,source):
         self.consume = False
