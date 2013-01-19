@@ -4,7 +4,7 @@ from nltk.tokenize.punkt import PunktWordTokenizer
 
 
 class Tokenizer(object):
-    def __init__(self, tokenizer='PunktWord', stopwords=''):
+    def __init__(self, tokenizer,language, stopwords=None ):
         if tokenizer == 'PunktWord':
             self.tokenizer = PunktWordTokenizer()
 
@@ -30,13 +30,17 @@ class Sentencer(object):
             raise ValueError('Language "',language,'" not implemented')
 
         # initialize the sentencer TODO: make it a hash switch
-        sentencers=['punct']
-        if sentencers.index(sentencer):
-            if sentencer == 'punct':  # here we load the picke learner.
-                sefl.sentencer = nltk.data.load('tokenizers/punkt/'+language+'.pickle')
+        sentencers=['punkt']
+        try:
+            sentencer = sentencers[ sentencers.index(sentencer) ]
+        except:
+            raise ValueError
+        try:
+            if sentencer == 'punkt':  # here we load the picke learner.
+                self.sentencer = nltk.data.load('tokenizers/punkt/'+language+'.pickle')
 
-        else:
-            raise ValueError('Sentencer: "',sentencer,'" not implemented')
+        except: 
+            raise ValueError('Sentencer: "'+sentencer+'" not implemented')
 
         self.data = []
 

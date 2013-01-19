@@ -7,8 +7,8 @@ class Elements(object):
     """Object containing obj.tokens and obj.texts with some additional convenience methods on the top."""
 
     def __init__(self):
-        self.tokens = Elements.Tokens()
-        self.texts = Element.Texts()
+        self.tokens = Tokens()
+        self.texts = Text()
         self.active = 'tokens'
 
     def add_data(self, source, sentence ):
