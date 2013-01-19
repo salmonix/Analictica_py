@@ -1,9 +1,8 @@
 import os
 import re
-import NLP.Sentencer
 
 # XXX we take only one file at once but we may have a full list
-class Source:
+class Readin(object):
 
     source_config={ 'text': 'TxtInput' }
 
@@ -11,7 +10,7 @@ class Source:
         self.lang=language
         self.data=[]
 
-    def read_data(self,**kwarg):
+    def read_data(self, **kwarg):
         """Takes a hash of { source : type }
         Returns an iterator of ( source_name, data entry split to sentences )"""
         if self.sentencer == 'default':
@@ -32,7 +31,7 @@ class Source:
                 next
 
 
-class TxtInput:
+class TxtInput(object):
     """Load  a txt file"""
     def __init__(self,source):
         self.consume = False

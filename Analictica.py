@@ -1,8 +1,9 @@
-import NLP
-import Data.Elements
-import Source
+from Data.Elements import Elements
+from Source import Readin
+from NLP.Tokenizers import Tokenizer, Sentencer
+from NLP.Filters import Stopword
 
-# environment sanity check
+# environment sanity checks
 import sys
 
 if sys.version_info >= (3,0):
@@ -15,14 +16,18 @@ data = { 'test' : 'txt' }
 
 
 # read it in aggregating into a pile -> source : [ sentences ]
-source = Source()
-source_iterator = source.read_data( data )
+source = Readin()
+source_iterator = source.read_data( **data )
+sentencer = Sentencer( sentencer='punkt', language='english' )
+tokenizer = Tokenize( tokenizer='PunktWord', language='english' )
 
-elements = Data.Elements()
+
+elements = Elements()
 for title, data in source_iterator():
     texts.text(source)
     for i in data:
-        text.add_token_idx( tokenizer.add_token( data ) )
+        tokens=sentencer.process(i)
+        text.add_token_idx( tokenizer.get_tokens( data ) )
 
 
 # make transform module -> from the token hash to create frequency and other tables and stats
