@@ -12,19 +12,18 @@ if sys.version_info >= (3,0):
     
 
 # get what I want to read from
-data = { 'test' : 'txt' } 
 
 
 # read it in aggregating into a pile -> source : [ sentences ]
 source = Readin()
-source_iterator = source.read_data( **data )
+source_iterator = source.read_data( 'test' )
 # preparators and containers
 sentencer = Sentencer( sentencer='punkt', language='english' )
 tokenizer = Tokenizer( tokenizer='PunktWord', language='english' )
 elements = Elements()
 
 print source_iterator
-for title, data in source_iterator():
+for title, data in source_iterator:
     texts.text(source)
     for i in data:
         tokens=sentencer.process(i)
