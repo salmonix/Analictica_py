@@ -11,25 +11,28 @@ if sys.version_info >= (3,0):
     sys.exit(1)
     
 
-# get what I want to read from
 
+def process_source(source,language,sentencer,tokenizer):
 
-# read it in aggregating into a pile -> source : [ sentences ]
-source = Readin()
-source_iterator = source.read_data( 'test' )
-# preparators and containers
-sentencer = Sentencer( sentencer='punkt', language='english' )
-tokenizer = Tokenizer( tokenizer='PunktWord', language='english' )
-elements = Elements()
+    source_iterator = Readin().read_data( source )
+    sentencer = Sentencer( sentencer, language )
+    tokenizer = Tokenizer( tokenizer, language )
+    elements = Elements()
 
-for title, data in source_iterator:
-    for i in data:
-       tokens=sentencer.process(i)
-       elements.add_data( title, data )
+    for title, data in source_iterator:
+        for i in data:
+            sentences=sentencer.process(i) 
+            for s in sentences:
+                tokens = tokenizer.get_tokens(s)
+                elements.add_data( title, tokens )
 
+    return elements
 
-# make transform module -> from the token hash to create frequency and other tables and stats
+# TODO make transform module -> from the token hash to create frequency and other tables and stats
 # from text to create a graph ( inserting sequence data into the token hash )
 
+elements = process_source( sentencer = 'punkt',language='english', tokenizer='PunktWord', source='test')
 
-# TODO: use listst wherever possible
+
+
+

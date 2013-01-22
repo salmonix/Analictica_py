@@ -11,10 +11,18 @@ class Elements(object):
         self.texts = Text()
         self.active = 'tokens'
 
-    def add_data(self, source, sentence ):
+    def add_data(self, source, tokenlist ):
         """Convenience method to process a sentence into the text and token containers."""
-        self.texts.text( source )
-        self.texts.add_token_idx( self.token.add_token(tokens) )
+        self.texts.add_text( source )
+        idx = self.tokens.add_token(tokenlist) 
+        self.texts.add_token_ids( idx )
+
+    def activate(self, slot):
+        if hasattr(self,slot) and slot != 'active':
+            self.active = slot
+        else:
+            raise ValueError(slot + ' is not attribute of the Elements instance.')
+
 
 # TODO: decide on the interface. Perhaps asking for the texts and tokens object when
 # those are acting separate, and writing the convenience methods here only. But that looks 
@@ -27,7 +35,7 @@ class Tokens(object):
         self.slots = ['hidden']
         self.idx = 0
         self.no_of_tokens = 0
-        self.tokens = [{}]   # token id -> id, token
+        self.tokens = [{}]   # token id ->{token_obj}
         self.names = {}   # name -> id
 
     def add_token( self, data ):
@@ -36,23 +44,24 @@ class Tokens(object):
             return self._add_token( data )
         elif isinstance( data, list ):
             idxs = []
-            for i in list:
-                idsx.append( self._add_token( i ) )
+            for i in data:
+                idxs.append( self._add_token( i ) )
+            return idxs
 
     # here we should implement the case when a token is a superclass
     # because it may change the number of tokens
     def _add_token( self, name, parent={}, children={} ):
-        if  self.names.has( name ): # token exists
+        if  name in self.names : # token exists
             token = self.names[ name ]
-            self.freq_in( token )
+            self.freq_incr( token )
+            return self.tokens[ token ]['idx']
 
         # the token hash is made here
         else:
             self.tokens.append( {'name' : name, 'freq' : 1, 'idx' : self.idx } )
             self.names[name] = self.idx
             self.idx += 1
-
-        return token.idx
+            return self.idx
 
     def get_token( self, token ):
         """Gets a token_id  ( index or name ) -> returns a token """
@@ -69,8 +78,15 @@ class Tokens(object):
             self.__dict__[by][i] = ( entity[0], token, token._)
 
     def freq_incr( self, token, num = 1 ):
-        freq = self.idxs[token]['freq']
-        freq = freq+num
+        if token is int:
+            freq = self.idx[token]['freq']
+            freq = freq+num
+            return freq
+        elif token is str:
+            freq = self.names[token]['freq']
+            freq = freq+num
+            return freq
+
 
 
 class Text(object):
@@ -80,16 +96,16 @@ class Text(object):
         self.text={}
         self.active=''
 
-    def text(self, source):
+    def add_text(self, source):
         """Start a new text unit."""
-        if self.text[source]:
+        if source in self.text:
             return self.text[source]
 
-        self.text[source] = array.array('L') # we use long ints
+        self.text[source] = []
         self.active = source
 
-    def add_token_idx(self,idx):
-         self.text[ self.active ].append(idx)
+    def add_token_ids(self,idxs):
+        self.text[ self.active ].append( array.array('L', idxs) ) # we use long ints
 
     def get_text(self,text=[]):
         """Returns a title, text_array tuple for the given text titles. If nothing is passed returns for all."""

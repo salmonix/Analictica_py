@@ -1,18 +1,19 @@
 import re
 import nltk.data
 from nltk.tokenize.punkt import PunktWordTokenizer
+from nltk.tokenize import sent_tokenize # this is the regexp based tokenizer
 
 
 class Tokenizer(object):
     def __init__(self, tokenizer,language, stopwords=None ):
-        if tokenizer == 'PunktWord':
-            self.tokenizer = PunktWordTokenizer()
+        try:
+            if tokenizer == 'PunktWord':
+                self.tokenizer = PunktWordTokenizer()
+        except:
+            raise ValueError(tokenizer+" tokenizer not implemented" )
 
-    def get_tokens(string):
+    def get_tokens(self,string):
         return self.tokenizer.tokenize(string)
-
-# This sentence splitting is unclear and badly designed
-from nltk.tokenize import sent_tokenize # this is the regexp based tokenizer
 
 class Sentencer(object):
     """Initialized with a sentencer and language parameter it stores the language related sentencer."""
@@ -39,8 +40,6 @@ class Sentencer(object):
 
     def process( self, string ):
         """ Takes a string and returns a list of sentences. Non-comma punctuation is turned into . and whitespaces are removed. """
-
-        # preparation
         e = Sentencer.normal_punct.sub('.', string )
         e = Sentencer.rm_noise.sub( ' ',e )
         # make a factory here using self.sentencer
