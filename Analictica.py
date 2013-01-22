@@ -9,8 +9,6 @@ import sys
 if sys.version_info >= (3,0):
     print ('NLTK at the moment runs with the version 2.x')
     sys.exit(1)
-    
-
 
 def process_source(source,language,sentencer,tokenizer):
 
@@ -32,7 +30,14 @@ def process_source(source,language,sentencer,tokenizer):
 # from text to create a graph ( inserting sequence data into the token hash )
 
 elements = process_source( sentencer = 'punkt',language='english', tokenizer='PunktWord', source='test')
+texts = elements.texts
+tokens = elements.tokens
+text_iter = texts.get_text() 
+a = ''
+for t in text_iter:
+    sentences = t[1]
+    for s in sentences:
+        for i in s:
+            a = a + ' ' + tokens.tokens[i]['name']
 
-
-
-
+print a

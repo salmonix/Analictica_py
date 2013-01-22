@@ -1,5 +1,4 @@
 import re
-import array
 
 
 # I do not know if it is a great idea to put so much functionality here
@@ -14,6 +13,7 @@ class Elements(object):
     def add_data(self, source, tokenlist ):
         """Convenience method to process a sentence into the text and token containers."""
         self.texts.add_text( source )
+        print(tokenlist)
         idx = self.tokens.add_token(tokenlist) 
         self.texts.add_token_ids( idx )
 
@@ -40,9 +40,9 @@ class Tokens(object):
 
     def add_token( self, data ):
         """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
-        if isinstance(  data, str ):
+        if isinstance(  data, str ): # add a string
             return self._add_token( data )
-        elif isinstance( data, list ):
+        elif isinstance( data, list ): # add a list of strings
             idxs = []
             for i in data:
                 idxs.append( self._add_token( i ) )
@@ -56,11 +56,11 @@ class Tokens(object):
             self.freq_incr( token )
             return self.tokens[ token ]['idx']
 
-        # the token hash is made here
+        # new token hash is made here
         else:
+            self.idx += 1
             self.tokens.append( {'name' : name, 'freq' : 1, 'idx' : self.idx } )
             self.names[name] = self.idx
-            self.idx += 1
             return self.idx
 
     def get_token( self, token ):
@@ -99,17 +99,18 @@ class Text(object):
     def add_text(self, source):
         """Start a new text unit."""
         if source in self.text:
+            print (source)
             return self.text[source]
 
         self.text[source] = []
         self.active = source
 
     def add_token_ids(self,idxs):
-        self.text[ self.active ].append( array.array('L', idxs) ) # we use long ints
+        self.text[ self.active ].append( idxs )
 
     def get_text(self,text=[]):
-        """Returns a title, text_array tuple for the given text titles. If nothing is passed returns for all."""
-        if text == []:   # this is perlish because we can make it an iterator on hash which might be better
+        """Returns a title, text list tuple for the given text titles. If nothing is passed returns for all."""
+        if text == []:
             text = self.text.keys()
-            for i in text:
-                yield (i, self.text[i])
+            for t in text: # this is each sentence list
+                yield (t, self.text[t])

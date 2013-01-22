@@ -40,7 +40,7 @@ class Sentencer(object):
 
     def process( self, string ):
         """ Takes a string and returns a list of sentences. Non-comma punctuation is turned into . and whitespaces are removed. """
-        e = Sentencer.normal_punct.sub('.', string )
+        e = Sentencer.normal_punct.sub(' .', string )
         e = Sentencer.rm_noise.sub( ' ',e )
         # make a factory here using self.sentencer
         return self.sentencer.tokenize(e)
