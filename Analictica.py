@@ -22,12 +22,10 @@ sentencer = Sentencer( sentencer='punkt', language='english' )
 tokenizer = Tokenizer( tokenizer='PunktWord', language='english' )
 elements = Elements()
 
-print source_iterator
 for title, data in source_iterator:
-    texts.text(source)
     for i in data:
-        tokens=sentencer.process(i)
-        text.add_token_idx( tokenizer.get_tokens( data ) )
+       tokens=sentencer.process(i)
+       elements.add_data( title, data )
 
 
 # make transform module -> from the token hash to create frequency and other tables and stats

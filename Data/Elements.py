@@ -74,8 +74,8 @@ class Tokens(object):
 
 
 class Text(object):
-    """Text container: stores the text transformed into sequences of token index numbers.
-    """
+    """Text container: stores the text transformed into sequences of token index numbers."""
+    # TODO: in case of lots of texts it should be optimized
     def __init__(self):
         self.text={}
         self.active=''

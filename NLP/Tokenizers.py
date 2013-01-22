@@ -11,12 +11,11 @@ class Tokenizer(object):
     def get_tokens(string):
         return self.tokenizer.tokenize(string)
 
-
-
 # This sentence splitting is unclear and badly designed
 from nltk.tokenize import sent_tokenize # this is the regexp based tokenizer
 
 class Sentencer(object):
+    """Initialized with a sentencer and language parameter it stores the language related sentencer."""
     # this is a factory like part. It may go into different factory classes if needed
     # these are preprocessing regexps.
     rm_noise = re.compile('\s+')
@@ -30,26 +29,19 @@ class Sentencer(object):
             raise ValueError('Language "',language,'" not implemented')
 
         # initialize the sentencer TODO: make it a hash switch
-        sentencers=['punkt']
-        try:
-            sentencer = sentencers[ sentencers.index(sentencer) ]
-        except:
-            raise ValueError
         try:
             if sentencer == 'punkt':  # here we load the picke learner.
                 self.sentencer = nltk.data.load('tokenizers/punkt/'+language+'.pickle')
-
         except: 
             raise ValueError('Sentencer: "'+sentencer+'" not implemented')
 
         self.data = []
 
     def process( self, string ):
-        """ Takes a string and processes it. Returns a list of sentences"""
+        """ Takes a string and returns a list of sentences. Non-comma punctuation is turned into . and whitespaces are removed. """
 
         # preparation
-        e = self.data.pop()
-        e = normal_punct( e )
-        e = rm_noise.sub( ' ',e )
+        e = Sentencer.normal_punct.sub('.', string )
+        e = Sentencer.rm_noise.sub( ' ',e )
         # make a factory here using self.sentencer
         return self.sentencer.tokenize(e)
