@@ -7,25 +7,6 @@ from NLP.Filters import Stopword
 
 
 
-def process_sources(source,language,sentencer,tokenizer):
-    """The main function. Reading the parameters it loads and processes the sources, 
-    returning an Elements instance of Tokens and Texts."""
-
-    source_iterator = Readin().read_data( source )
-    sentencer = Sentencer( sentencer, language )
-    tokenizer = Tokenizer( tokenizer, language )
-    elements = Elements()
-
-    for title, data in source_iterator:
-        for i in data:
-            sentences=sentencer.process(i) 
-            for s in sentences:
-                tokens = tokenizer.get_tokens(s)
-                elements.add_data( title, tokens )
-
-    return elements
-
-
 # XXX we take only one file at once but we may have a full list
 class Readin(object):
     """Returns a generator which returns a data entry as title - data string.
@@ -47,10 +28,38 @@ class Readin(object):
         if con_type == "Txt": return Txt(con_params).read_in()
         assert 0, "Bad shape creation: " + type
 
-    def __init__(self):
-        self.data=[]
+    def __init__(self, *parameters):
+    """The main function. Reading the parameters it loads and processes the sources, 
+    returning an Elements instance of Tokens and Texts.
+    Parameters: sentencer, language, tokenizer."""
+        self.sentencer = Sentencer( sentencer, language )
+        self.tokenizer = Tokenizer( tokenizer, language )
+        self.elements = Elements()
 
-    def read_data(self, *sources):
+    def process_source(self,source):
+        if os.path.isfile(source):
+            return _process_file(source)
+        elif os.path.isdir(source):
+            while f in os.path.listdir(source):
+                _process_file(f)
+
+        return self.elements
+
+
+    def _process_file(source):
+        source_iterator = Readin().read_data( source )
+
+        for title, data in source_iterator:
+            for i in data:
+                sentences=self.sentencer.process(i) 
+                for s in sentences:
+                    tokens = self.tokenizer.get_tokens(s)
+                    sefl.elements.add_data( title, tokens )
+
+        return self.elements
+
+
+    def read_data(self,source):
         """Takes source_name, returns an iterator of ( source_name, data string )
         It passes the wole dictionary entry of the tuple related to the sourcename(s)"""
 
@@ -77,3 +86,11 @@ class Txt(object):
             file_string = f.read()
         f.close()
         return [ file_string ]
+
+# clear it up, check regexp etc.
+class ATU(Txt):
+    closures_cfs = re.compile('\[.*?\]|cf\..*?\.')
+    def read_in(self):
+        data = SUPER.read_in()
+        data = closures_cfs.sub('', data)
+        return data
