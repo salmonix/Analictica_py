@@ -1,5 +1,5 @@
 import re
-
+import math
 
 # I do not know if it is a great idea to put so much functionality here
 class Elements(object):
@@ -13,7 +13,6 @@ class Elements(object):
     def add_data(self, source, tokenlist ):
         """Convenience method to process a sentence into the text and token containers."""
         self.texts.add_text( source )
-        print(tokenlist)
         idx = self.tokens.add_token(tokenlist) 
         self.texts.add_token_ids( idx )
 
@@ -35,7 +34,7 @@ class Tokens(object):
         self.slots = ['hidden']
         self.idx = 0
         self.no_of_tokens = 0
-        self.tokens = [{}]   # token id ->{token_obj}
+        self.tokens = []   # token id ->{token_obj}
         self.names = {}   # name -> id
 
     def add_token( self, data ):
@@ -51,41 +50,58 @@ class Tokens(object):
     # here we should implement the case when a token is a superclass
     # because it may change the number of tokens
     def _add_token( self, name, parent={}, children={} ):
-        if  name in self.names : # token exists
+        if  name in self.names :     # token exists
             token = self.names[ name ]
             self.freq_incr( token )
             return self.tokens[ token ]['idx']
 
         # new token hash is made here
         else:
-            self.idx += 1
             self.tokens.append( {'name' : name, 'freq' : 1, 'idx' : self.idx } )
             self.names[name] = self.idx
+            self.idx += 1
             return self.idx
 
     def get_token( self, token ):
-        """Gets a token_id  ( index or name ) -> returns a token """
-        return self.idxs( token_id )
-
-    def order(self, by='freq' ):
-        """ Orders the tokens by a numeric attribute. """
-        tokens = self.tokens
-        sorted_ids = sorted( self.idxs(), key = tokens[x][ by ] )
-        indexed_list = self.idxs
-        for i in sorted_ids:
-            entity = indexed_list[i] # tuple of id, token, order value ( by )
-            token = entity[1]
-            self.__dict__[by][i] = ( entity[0], token, token._)
+        """Gets a token_id  ( index ) -> returns a token """
+        return self.idx( token_id )
 
     def freq_incr( self, token, num = 1 ):
-        if token is int:
-            freq = self.idx[token]['freq']
-            freq = freq+num
-            return freq
-        elif token is str:
-            freq = self.names[token]['freq']
-            freq = freq+num
-            return freq
+        if type(token) is str:
+            token = self.names[token]
+        
+        self.tokens[token]['freq'] = self.tokens[token]['freq'] + num
+        return self.tokens[token]['freq'] 
+
+    # ###############################################################
+    # these are functions acting on the tokens but not inherently related to the class.
+    # in future these may go into a helper module/class
+
+    def order(self, by='freq' ):
+        """ Orders the tokens by a numeric attribute and returns the [ ids ]."""
+        s = sorted( self.tokens, key = lambda x : ( x[ by ] ) )
+        ret = []
+        for i in s:
+            ret.append( i['idx'] )
+        return ret
+
+    def calculate_probability(self):
+        for i in self.tokens:
+            freq = float(i['freq'])
+            p = 1/(self.idx/freq)
+            i['p'] = p
+
+    def add_entropy(self, algo ):
+        if not 'p' in self.tokens[0]:
+            self.calculate_probability()
+
+        if algo == 'shannon_entropy':
+            for t in self.tokens:
+                p = t['p']
+                t[algo] = -1*p*math.log(p,2)
+        else:
+            raise ValueError( algo + ' is not implemented ')
+
 
 
 
@@ -99,7 +115,6 @@ class Text(object):
     def add_text(self, source):
         """Start a new text unit."""
         if source in self.text:
-            print (source)
             return self.text[source]
 
         self.text[source] = []

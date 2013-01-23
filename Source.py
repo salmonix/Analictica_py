@@ -1,6 +1,31 @@
 import os
 import re
 
+from Data.Elements import Elements
+from NLP.Tokenizers import Tokenizer, Sentencer
+from NLP.Filters import Stopword
+
+
+
+def process_sources(source,language,sentencer,tokenizer):
+    """The main function. Reading the parameters it loads and processes the sources, 
+    returning an Elements instance of Tokens and Texts."""
+
+    source_iterator = Readin().read_data( source )
+    sentencer = Sentencer( sentencer, language )
+    tokenizer = Tokenizer( tokenizer, language )
+    elements = Elements()
+
+    for title, data in source_iterator:
+        for i in data:
+            sentences=sentencer.process(i) 
+            for s in sentences:
+                tokens = tokenizer.get_tokens(s)
+                elements.add_data( title, tokens )
+
+    return elements
+
+
 # XXX we take only one file at once but we may have a full list
 class Readin(object):
     """Returns a generator which returns a data entry as title - data string.
@@ -9,8 +34,8 @@ class Readin(object):
         where type is the name of the module that reads the data,
         the following dictionary stores the rest of the connection parameters, which is 
         path in the case of a file."""
-
-    connections = {'test' : ( 'Txt' ,{ 'path':'/home/salmonix/memdrive/Analictica.test_text' } ) } # we should load it from file later
+    # we should load it from file later
+    connections = {'test' : ( 'Txt' ,{ 'path':'/home/salmonix/memdrive/Analictica.test_text' } ) }
     @classmethod
     def list_connections(cls):
         return Readin.connections.keys()
