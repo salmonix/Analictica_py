@@ -16,7 +16,7 @@ def test_for_text_tokens(elements):
     print a
 
 
-elements = process_sources( sentencer = 'punkt',language='english', tokenizer='PunktWord', source='test')
+elements = Readin( sentencer = 'punkt',language='english', tokenizer='PunktWord').process_source(source='test')
 elements.tokens.add_entropy('shannon_entropy')
 print('Sorting test')
 ordered_elements = elements.tokens.order('shannon_entropy')
