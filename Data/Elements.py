@@ -21,6 +21,7 @@ class Elements(object):
     def process_datastring( self, title, data ):
         sentences = self.sentencer.process(data)
         for s in sentences:
+            s = '_head_ ' + s # we add the head element. maybe we should take it from Tokens.tokens[0]
             tokens = self.tokenizer.get_tokens(s)
             self.add_data( title, tokens )
 
@@ -41,18 +42,19 @@ class Elements(object):
 class Tokens(object):
     """ Container for the tokens, the nodes. Token container is not optimal for deletion. """
     def __init__( self ):
+        """The initial token is _head , which is the head of a sequence."""
         self.active = []
         self.slots = ['hidden']
         self.idx = 0
-        self.no_of_tokens = 0
-        self.tokens = []  # token id ->{token_obj}
-        self.names = {}   # name -> id TODO: lookup using trie
+        self.no_of_tokens = 1
+        self.tokens = [ {'name' : '_head_', 'freq' : 0, 'idx' : 0, 'colloc' : [] } ]  # token id ->{token_obj}
+        self.names = { '_head_': 0 }   # name -> id TODO: lookup using trie
         self.calculation_cache = {} # this is to store the last values of calculations, like entropy or probability
         # this is a copy of the first token. 'Recalc': non existing or differs from the first calculation.
 
     def add_token( self, data ):
         """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
-        if isinstance(  data, str ): # add a string
+        if isinstance(  data, str ): # add a string - obsolete
             return self._add_token( data )
         elif isinstance( data, list ): # add a list of strings
             idxs = []
@@ -72,9 +74,9 @@ class Tokens(object):
 
         # new token hash is made here
         else:
+            self.idx += 1
             self.tokens.append( {'name' : name, 'freq' : 1, 'idx' : self.idx } )
             self.names[name] = self.idx
-            self.idx += 1
             return self.idx
 
     def get_token( self, token ):
@@ -94,7 +96,7 @@ class Tokens(object):
 
     def order(self, by='freq' ):
         """Orders the tokens by an attribute and returns the [ ids ]."""
-        if not self.tokens[0][by]:
+        if not self.tokens[-1][by]:
             raise ValueError( 'no attribute as ' + by )
 
         s = sorted( self.tokens, key = lambda x : ( x[ by ] ) )
@@ -105,10 +107,10 @@ class Tokens(object):
     
     # ( self )->( self )
     def calculate_probability(self):
-        if not 'p' in self.tokens[0] or self.calculation_cache['p'] != probability(self.idx, self.tokens[0] ):
-                for i in self.tokens: # calculate
-                    i['p'] = probability(self.idx, i['freq'])
-                self.make_unchanged()
+        if not 'p' in self.tokens[-1] or self.calculation_cache['p'] != probability(self.idx, self.tokens[-1] ):
+            for i in self.tokens:
+                i['p'] = probability(self.idx, i['freq'])
+            self.make_unchanged()
         
 
     # ( self )->( self )
@@ -119,13 +121,13 @@ class Tokens(object):
             entr = entropy(algo)
         else:
             raise ValueError( algo + ' is not implemented ')
-        if not algo in self.tokens[0] or self.calculation_cache[algo] != entr( self.tokens[0] ):
+        if not algo in self.tokens[-1] or self.calculation_cache[algo] != entr( self.tokens[-1] ):
             for t in self.tokens:
                 t[algo] = entr(t)
         self.make_unchanged()
 
     def make_unchanged(self):
-        self.calculation_cache = copy( self.tokens[0] )
+        self.calculation_cache = copy( self.tokens[-1] )
 
 
 class Text(object):
@@ -146,9 +148,14 @@ class Text(object):
     def add_token_ids(self,idxs):
         self.text[ self.active ].append( idxs )
 
-    def get_text(self,text=[]):
+    def get_text_by_title(self,title=[]):
         """Returns a title, text list tuple for the given text titles. If nothing is passed returns for all."""
-        if text == []:
-            text = self.text.keys()
-            for t in text: # this is each sentence list
+        if title == []:
+            title = self.text.keys()
+            for t in title: # this is each sentence list
                 yield (t, self.text[t])
+
+    def get_sentences(self):
+        for i in self.text.values():
+            for s in i:
+                yield s
