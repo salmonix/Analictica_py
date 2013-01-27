@@ -1,14 +1,28 @@
 import re
 import math
+from copy import copy
 
-# I do not know if it is a great idea to put so much functionality here
+from NLP.Tokenizers import Tokenizer, Sentencer
+from NLP.Filters import Stopword
+
+from Modules.Abacus import entropy,probability
+
 class Elements(object):
     """Object containing obj.tokens and obj.texts with some additional convenience methods on the top."""
 
-    def __init__(self):
+    def __init__(self, sentencer, tokenizer, language):
+        self.sentencer = Sentencer( sentencer, language )
+        self.tokenizer = Tokenizer( tokenizer, language )
+
         self.tokens = Tokens()
         self.texts = Text()
         self.active = 'tokens'
+
+    def process_datastring( self, title, data ):
+        sentences = self.sentencer.process(data)
+        for s in sentences:
+            tokens = self.tokenizer.get_tokens(s)
+            self.add_data( title, tokens )
 
     def add_data(self, source, tokenlist ):
         """Convenience method to process a sentence into the text and token containers."""
@@ -23,9 +37,6 @@ class Elements(object):
             raise ValueError(slot + ' is not attribute of the Elements instance.')
 
 
-# TODO: decide on the interface. Perhaps asking for the texts and tokens object when
-# those are acting separate, and writing the convenience methods here only. But that looks 
-# awkward to make this module triple faced
 
 class Tokens(object):
     """ Container for the tokens, the nodes. Token container is not optimal for deletion. """
@@ -34,8 +45,10 @@ class Tokens(object):
         self.slots = ['hidden']
         self.idx = 0
         self.no_of_tokens = 0
-        self.tokens = []   # token id ->{token_obj}
-        self.names = {}   # name -> id
+        self.tokens = []  # token id ->{token_obj}
+        self.names = {}   # name -> id TODO: lookup using trie
+        self.calculation_cache = {} # this is to store the last values of calculations, like entropy or probability
+        # this is a copy of the first token. 'Recalc': non existing or differs from the first calculation.
 
     def add_token( self, data ):
         """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
@@ -47,8 +60,10 @@ class Tokens(object):
                 idxs.append( self._add_token( i ) )
             return idxs
 
-    # here we should implement the case when a token is a superclass
-    # because it may change the number of tokens
+    # TODO: here we should implement the case when a token is a superclass
+    # because it may change the number of tokens -> I mean ontological solution, graph etc.
+    # the way we use self.idx to calculate probability should change to a 'states' attribute later
+    # that can be modified according to the parent categories
     def _add_token( self, name, parent={}, children={} ):
         if  name in self.names :     # token exists
             token = self.names[ name ]
@@ -74,35 +89,43 @@ class Tokens(object):
         return self.tokens[token]['freq'] 
 
     # ###############################################################
-    # these are functions acting on the tokens but not inherently related to the class.
-    # in future these may go into a helper module/class
+    # these are functions acting on the tokens extending the core functionality
+    # in future these may go into a helper module/class or so
 
     def order(self, by='freq' ):
-        """ Orders the tokens by a numeric attribute and returns the [ ids ]."""
+        """Orders the tokens by an attribute and returns the [ ids ]."""
+        if not self.tokens[0][by]:
+            raise ValueError( 'no attribute as ' + by )
+
         s = sorted( self.tokens, key = lambda x : ( x[ by ] ) )
         ret = []
         for i in s:
             ret.append( i['idx'] )
         return ret
-
+    
+    # ( self )->( self )
     def calculate_probability(self):
-        for i in self.tokens:
-            freq = float(i['freq'])
-            p = 1/(self.idx/freq)
-            i['p'] = p
+        if not 'p' in self.tokens[0] or self.calculation_cache['p'] != probability(self.idx, self.tokens[0] ):
+                for i in self.tokens: # calculate
+                    i['p'] = probability(self.idx, i['freq'])
+                self.make_unchanged()
+        
 
+    # ( self )->( self )
     def add_entropy(self, algo ):
-        if not 'p' in self.tokens[0]:
-            self.calculate_probability()
+        self.calculate_probability()
 
-        if algo == 'shannon_entropy':
-            for t in self.tokens:
-                p = t['p']
-                t[algo] = -1*p*math.log(p,2)
+        if algo == 'shannon':
+            entr = entropy(algo)
         else:
             raise ValueError( algo + ' is not implemented ')
+        if not algo in self.tokens[0] or self.calculation_cache[algo] != entr( self.tokens[0] ):
+            for t in self.tokens:
+                t[algo] = entr(t)
+        self.make_unchanged()
 
-
+    def make_unchanged(self):
+        self.calculation_cache = copy( self.tokens[0] )
 
 
 class Text(object):

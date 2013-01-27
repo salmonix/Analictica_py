@@ -1,4 +1,5 @@
-from Source import process_sources
+from Source import Corpus
+from Data.Elements import Elements
 
 # environment sanity checks
 import sys
@@ -9,17 +10,19 @@ def test_for_text_tokens(elements):
     text_iter = texts.get_text() 
     a = ''
     for t in text_iter:
-        sentences = t[1]
+        sentences = t[1] # it is a title - sentences tuple
         for s in sentences:
-            for i in s:
-                a = a + ' ' + tokens.tokens[i]['name']
-    print a
+            print s
+#            for i in s: # token level
+#                print (tokens.tokens[i]['name']) # XXX sg goes wrong
 
 
-elements = Readin( sentencer = 'punkt',language='english', tokenizer='PunktWord').process_source(source='test')
-elements.tokens.add_entropy('shannon_entropy')
-print('Sorting test')
-ordered_elements = elements.tokens.order('shannon_entropy')
-print ordered_elements
+elements = Elements( sentencer = 'punkt',language='english', tokenizer='PunktWord')
+for (title, text ) in Corpus().process( source = 'atu' ): # I feel it awkward
+    elements.process_datastring(title,text)
 
 
+elements.tokens.add_entropy('shannon')
+# print('Sorting test')
+# ordered_elements = elements.tokens.order('shannon') # this is an array
+test_for_text_tokens(elements)
