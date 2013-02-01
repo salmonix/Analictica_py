@@ -34,3 +34,14 @@ b. parsing for VP, then starting to move. If VP is not found after a stop, the
     To do that we need a VP trie or some other HASH structure to store the
     words according to the character of the language. We must store 6000
     verbs.
+
+PMI:
+The Pointwise Mutual Information (PMI) between two words (in our case motifs), word1 and word2, is defined as
+follows (Church & Hanks, 1989 "Word association norms, mutual information and lexicography"), and was used by Turney ("Thumbs Up or Thumbs Down? Semantic Orientation Applied to Unsupervised Classification of Reviews")
+
+PMI(word1, word2) = log2 ( p(word1 & word2) / p(word1) X p(word2) )
+
+If there is a genuine association between word1 and word2, then the joint probability P(word1,word2) will be much larger than chance P(word1) X P(word2), and consequently PMI(word2,word2) >> 0. If there is no interesting relationship between word1 and word2, then P(word1,word2) P(word1) P(word2), and thus, I(word1,word2) ~ O. If word1 and word2 are in complementary distribution, then P(word2,y) will be much less than
+P(word1) X P(word2), forcing PMI(word1,word2) << 0.
+
+In our case, (see res_pmi.xlsx) all the values =0 where omitted and results are given only for pairs of motifs who co-occurred.

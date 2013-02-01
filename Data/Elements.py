@@ -7,9 +7,12 @@ from NLP.Filters import Stopword
 
 from Modules.Abacus import entropy,probability
 
+
+# CAVEAT: the sentence head token is hard coded as id 0 
 class Elements(object):
     """Object containing obj.tokens and obj.texts with some additional convenience methods on the top."""
 
+    start_token = '_head_'
     def __init__(self, sentencer, tokenizer, language):
         self.sentencer = Sentencer( sentencer, language )
         self.tokenizer = Tokenizer( tokenizer, language )
@@ -17,43 +20,41 @@ class Elements(object):
         self.tokens = Tokens()
         self.texts = Text()
         self.active = 'tokens'
+        self._token_before = 0
 
     def process_datastring( self, title, data ):
         sentences = self.sentencer.process(data)
         for s in sentences:
-            s = '_head_ ' + s # we add the head element. maybe we should take it from Tokens.tokens[0]
+            s = Elements.start_token + s # we add the head element. maybe we should take it from Tokens.tokens[0]
             tokens = self.tokenizer.get_tokens(s)
             self.add_data( title, tokens )
-
+            
     def add_data(self, source, tokenlist ):
         """Convenience method to process a sentence into the text and token containers."""
         self.texts.add_text( source )
-        idx = self.tokens.add_token(tokenlist) 
+        idx = self.tokens.add_token(tokenlist)
         self.texts.add_token_ids( idx )
 
-    def activate(self, slot):
-        if hasattr(self,slot) and slot != 'active':
-            self.active = slot
-        else:
-            raise ValueError(slot + ' is not attribute of the Elements instance.')
 
-
-
-class Tokens(object):
+class Tokens(Elements):
     """ Container for the tokens, the nodes. Token container is not optimal for deletion. """
+    
     def __init__( self ):
         """The initial token is _head , which is the head of a sequence."""
+        
         self.active = []
         self.slots = ['hidden']
         self.idx = 0
         self.no_of_tokens = 1
-        self.tokens = [ {'name' : '_head_', 'freq' : 0, 'idx' : 0, 'colloc' : [] } ]  # token id ->{token_obj}
-        self.names = { '_head_': 0 }   # name -> id TODO: lookup using trie
+        self.tokens = [ {'name' : Elements.start_token, 'freq' : 0, 'idx' : 0  } ]  # token id ->{token_obj}
+        self.names = { Elements.start_token : 0 }   # name -> id TODO: lookup using trie
         self.calculation_cache = {} # this is to store the last values of calculations, like entropy or probability
         # this is a copy of the first token. 'Recalc': non existing or differs from the first calculation.
+        self.
 
     def add_token( self, data ):
         """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
+        
         if isinstance(  data, str ): # add a string - obsolete
             return self._add_token( data )
         elif isinstance( data, list ): # add a list of strings
@@ -81,6 +82,7 @@ class Tokens(object):
 
     def get_token( self, token ):
         """Gets a token_id  ( index ) -> returns a token """
+        
         return self.idx( token_id )
 
     def freq_incr( self, token, num = 1 ):
@@ -106,7 +108,7 @@ class Tokens(object):
         return ret
     
     # ( self )->( self )
-    def calculate_probability(self):
+    def calculate_probability(self, probability = 'p'): # perhaps a factory parameter
         if not 'p' in self.tokens[-1] or self.calculation_cache['p'] != probability(self.idx, self.tokens[-1] ):
             for i in self.tokens:
                 i['p'] = probability(self.idx, i['freq'])
@@ -114,8 +116,10 @@ class Tokens(object):
         
 
     # ( self )->( self )
-    def add_entropy(self, algo ):
-        self.calculate_probability()
+    def add_entropy(self, algo, probability ):
+    """ Calculater the given entropy from the given probability type."""
+        
+        self.calculate_probability(probability)
 
         if algo == 'shannon':
             entr = entropy(algo)
@@ -130,8 +134,10 @@ class Tokens(object):
         self.calculation_cache = copy( self.tokens[-1] )
 
 
+# perhaps parent class for Tokens?
 class Text(object):
     """Text container: stores the text transformed into sequences of token index numbers."""
+    
     # TODO: in case of lots of texts it should be optimized
     def __init__(self):
         self.text={}
@@ -139,6 +145,7 @@ class Text(object):
 
     def add_text(self, source):
         """Start a new text unit."""
+        
         if source in self.text:
             return self.text[source]
 
@@ -148,8 +155,9 @@ class Text(object):
     def add_token_ids(self,idxs):
         self.text[ self.active ].append( idxs )
 
-    def get_text_by_title(self,title=[]):
+    def get_text(self,title=[]):
         """Returns a title, text list tuple for the given text titles. If nothing is passed returns for all."""
+        # XXX name changed : get_text
         if title == []:
             title = self.text.keys()
             for t in title: # this is each sentence list
@@ -159,3 +167,16 @@ class Text(object):
         for i in self.text.values():
             for s in i:
                 yield s
+                
+    def add_co_occurrences(self, tokens):
+        """It add two type of occurrences: a.) co-occurrence ( A and B in the same sentence ) and seen_before"""
+        
+        for sen in self.get_sentences:
+            last_seen = 0
+            for c in range(1, len(sen) ): # skip the head token
+                token = tokens[c]
+                before = sen[c-1]
+                tokens[c]['seen_before'][ tokens[ before ] ] += 1
+                tokens[c]['co_occurrence'][ token[ before ] ] += 1
+                
+            
