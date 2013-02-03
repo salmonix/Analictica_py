@@ -8,43 +8,41 @@ class Table(object):
         self.array = zeros((dim, dim), dtype=float)
 
     # simple tables
-    def build_table(self, attribute, join=None):
+    def build_table(self, method):
         """Simple tables : takes an attribute of key:value type, where
         key: tokenid, value: value in relation to the referring token;
         builds a table as token X token with the referring value in the cell."""
-
-        if join:
-            return self._joined_tables(attribute, join)
 
         for xToken in self.tokens:
             yTokens = ''
             try:
                 # print(attribute)
                 # print (xToken)
-                yTokens = getattr(xToken, attribute)
+                yTokens = getattr(xToken, method)
                 # print (yTokens)
             except:
                 raise ValueError
 
             x = xToken.idx
             print (yTokens)
-            for y, v in yTokens.items():
-                self.array[x][y] = v
+
+            if hasattr(yTokens, '__iter__'):
+                for y, v in yTokens.items():
+                    self.array[x][y] = v
+
+            elif hasattr(yTokens, '__call__'):
+                try:
+                    fun = partial(getattr(xToken, method))  # partial function -> no check we have on parameters!
+                except:
+                    raise ValueError('Unable to get partial function from method ' + str(method))
+                for yToken in self.tokens:  # this is an iterable on which we calculate the actual formula
+                    y = yToken.idx
+                    self.array[x][y] = fun(yToken)
+
+            else:
+                raise ValueError('Parameter method returns neither iterable nor function.')
 
 
-    def _joined_tables(self, attribute, join):
-        for xToken in self.tokens:
-            v1 = 0.0
-            try:
-                fun = partial(getattr(t, attribute), x)  # partial function -> no check we have on parameters!
-            except:
-                raise ValueError(e)
-            x = xToken.idx
-            for yToken in getattr(t, join):  # this is an iterable on which we calculate the actual formula
-                y = yToken.idx
-                self.array[x][y] = fun(yToken)
-
-# NOTES: if we can Curry the calculation in the external loop we can optimize the calculation in the internal loop
     def write_formatted(self):  # takes also : target object
         # if there is not table -> formatting must fail instead of creating an empty table
         # it will not work with ARRAYs  - we must write it immediately out to the passed object

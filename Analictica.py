@@ -28,9 +28,10 @@ elements = Elements(sentencer='punkt', language='english', tokenizer='PunktWord'
 for (title, text) in Corpus().process(source='test'):  # I feel it awkward
     elements.process_datastring(title, text)
 
-elements.sentences.add_co_occurrences(elements.tokens)
+elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 # test_for_text_tokens(elements)
 # print_tokens(elements.tokens)
 table = Tables.Table(elements.tokens)
-table.build_table(attribute='co_occurrence')
-print (table.write_formatted())
+table.build_table(method='PMI')
+
+# print (table.write_formatted())

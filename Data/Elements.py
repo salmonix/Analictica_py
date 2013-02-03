@@ -131,13 +131,19 @@ class Token(object):
 
     def conditional_probability(self, B):
         """Conditional probability on B: p(A&B)/P(B)"""
+        if B.name in self.co_occurrence:
+            return self.freq / self.Space * self[ B.co_occurrence ]
+        else:
+            return 0.0
 
-        self.freq / self.Space * self[ B.co_occurrence ]
-
+    # well, it is not optimized because of a number of zero lookup
+    # but well fits the design.
     def PMI(self, B):
         """Pointwise Mutual Information PMI(A|B) = p(A&B) / p(A)xp(B)"""
-
-        return -1 * log(2, (self.co_occurrence * self.Space) / (self.freq * B.freq))
+        if B.name in self.co_occurrence:
+            return -1 * log(2, (self.co_occurrence * self.Space) / (self.freq * B.freq))
+        else:
+            return 0.0
 
 
 
@@ -181,7 +187,7 @@ class Sentences(object):
         sentences = self.get_sentences()
         tokens = tokens.tokens
         for sen in sentences:
-            print (sen)
+            # print (sen)
             last_seen = 0
             p = 1
             for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
