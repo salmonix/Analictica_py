@@ -35,7 +35,10 @@ b. parsing for VP, then starting to move. If VP is not found after a stop, the
     words according to the character of the language. We must store 6000
     verbs.
 
+
 PMI:
+
+# Yuret applies the same...
 The Pointwise Mutual Information (PMI) between two words (in our case motifs), word1 and word2, is defined as
 follows (Church & Hanks, 1989 "Word association norms, mutual information and lexicography"), and was used by Turney ("Thumbs Up or Thumbs Down? Semantic Orientation Applied to Unsupervised Classification of Reviews")
 

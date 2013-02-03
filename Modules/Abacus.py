@@ -10,9 +10,9 @@ def entropy(name):
         return shannon
     raise ValueError(name + ' is not a defined method')
 
-def shannon(token):
+def shannon(token, S):
     try:
-        p = float(token['p'])
+        p = token['freq'] / S
         return -1 * p * math.log(p, 2)
     except:
         raise ValueError
@@ -22,8 +22,8 @@ def probability(S, freq):
     return 1 / (S / freq)
 
 
-def conditional_probability(Pa, Pb, S, on='co_occurrence'):  # on: the type of co-occurrence
-    Pa['freq'] / S * Pa[ Pb[on]['idx'] ]
+    def conditional_probability(A, B, S, on='co_occurrence'):  # on: the type of co-occurrence
+        A['freq'] / S * A[ B[on] ]
 
-def independent_joined_probability(Pa, Pb, S):
-    return (Pa['freq'] * Pb['freq']) / math.pow(S, 2)
+def independent_joined_probability(A, B, S):
+    return (A['freq'] * B['freq']) / math.pow(S, 2)
