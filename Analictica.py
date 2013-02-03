@@ -1,6 +1,7 @@
 from Source import Corpus
 from Data.Elements import Elements
 from Modules.Abacus import *
+from Data import Tables
 
 import sys
 from pprint import pprint
@@ -29,4 +30,7 @@ for (title, text) in Corpus().process(source='test'):  # I feel it awkward
 
 elements.sentences.add_co_occurrences(elements.tokens)
 # test_for_text_tokens(elements)
-print_tokens(elements.tokens)
+# print_tokens(elements.tokens)
+table = Tables.Table(elements.tokens)
+table.build_table(attribute='co_occurrence')
+print (table.write_formatted())
