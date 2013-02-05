@@ -6,16 +6,14 @@ from Data import Tables
 import sys
 from pprint import pprint
 
-def test_for_text_tokens(elements):  # this is the way to iterate over the corpus
+def test_for_text_tokens(elements):
     texts = elements.sentences
     tokens = elements.tokens
     text_iter = texts.get_sentences()
-    c = 0
     for sentences in text_iter:
-        print (str(c) + ' -> ' + str(sentences))
         for s in sentences:
             print ("token id :" + str(s))
-            print (tokens.tokens[s].name)  # XXX sg goes wrong
+            print (tokens.tokens[s].name)
 
 def print_tokens(tokens):
     for t in tokens.tokens:
@@ -30,8 +28,9 @@ for (title, text) in Corpus().process(source='test'):  # I feel it awkward
 
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 # test_for_text_tokens(elements)
-# print_tokens(elements.tokens)
+print_tokens(elements.tokens)
 table = Tables.Table(elements.tokens)
-table.build_table(method='PMI')
+print (table.build_table(method='co_occurrence'))
+print (table.build_table(method='PMI'))
 
-# print (table.write_formatted())
+print(table.write_formatted())

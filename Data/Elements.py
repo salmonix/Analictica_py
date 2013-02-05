@@ -131,8 +131,8 @@ class Token(object):
 
     def conditional_probability(self, B):
         """Conditional probability on B: p(A&B)/P(B)"""
-        if B.name in self.co_occurrence:
-            return self.freq / self.Space * self[ B.co_occurrence ]
+        if B.idx in self.co_occurrence:
+            return self.freq / self.Space * self[ B.co_occurrence[ B.idx ] ]
         else:
             return 0.0
 
@@ -140,16 +140,15 @@ class Token(object):
     # but well fits the design.
     def PMI(self, B):
         """Pointwise Mutual Information PMI(A|B) = p(A&B) / p(A)xp(B)"""
-        if B.name in self.co_occurrence:
-            return -1 * log(2, (self.co_occurrence * self.Space) / (self.freq * B.freq))
+        # print ('CO_OCC:' + str(self.co_occurrence))
+        if B.idx in self.co_occurrence:
+            return -1 * log(2, (self.co_occurrence[B.idx] * self.Space) / (self.freq * B.freq))
         else:
             return 0.0
 
-
-
-
 class Sentences(object):
     """Text container: stores the text transformed into sequences of token index numbers."""
+
     # TODO: in case of lots of texts it should be optimized
     def __init__(self):
         self.text = {}
@@ -169,6 +168,7 @@ class Sentences(object):
 
     def get_text(self, title=[]):
         """Returns a title, text list tuple for the given text titles. If nothing is passed returns for all."""
+
         # XXX name changed : get_text
         if title == []:
             title = self.text.keys()
@@ -181,20 +181,20 @@ class Sentences(object):
                 yield s
 
     def add_co_occurrences(self, tokens):
-        """Adds the co-occurrence of two words.
+        """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
         Possibly other occurrences can be calculated here, like syntagmatic co-occurrences."""
 
+        # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
         sentences = self.get_sentences()
         tokens = tokens.tokens
         for sen in sentences:
-            # print (sen)
-            last_seen = 0
-            p = 1
+            print (sen)
             for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
-                token = tokens[c]
-                for i in range(0, len(sen)):  # this is the all with all loop
-                    if sen[i] in token.co_occurrence:
-                        token.co_occurrence[ sen[i] ] += 1
-                    else:
-                        token.co_occurrence[ sen[i] ] = 1
-                p += 1
+                token = tokens[ sen[c] ]
+                for i in range(1, len(sen)):  # this is the all with all loop
+                    if c != i:
+                        if sen[i] in token.co_occurrence:
+                            token.co_occurrence[ sen[i] ] += 1
+                        else:
+                            token.co_occurrence[ sen[i] ] = 1
+                    # print (" %d : %d " % (c, i))

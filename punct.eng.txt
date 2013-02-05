@@ -36,6 +36,15 @@ b. parsing for VP, then starting to move. If VP is not found after a stop, the
     verbs.
 
 
+
+TODO:
+- need a graph class
+- complete the data exporter modules
+
+
+
+
+
 PMI:
 
 # Yuret applies the same...
