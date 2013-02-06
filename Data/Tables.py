@@ -60,7 +60,7 @@ class Table(object):
         return self.array
 
 
-    def write_formatted(self, writer ):  # takes also : target object
+    def write_formatted(self, writer):  # takes also : target object
         # if there is not table -> formatting must fail instead of creating an empty table
         # it will not work with ARRAYs  - we must write it immediately out to the passed object
         header = [ t.name for t in self.tokens]
@@ -70,28 +70,38 @@ class Table(object):
             row.append(header[i])
             for e in self.array[i]:
                 row.append(e)
-            writer.append(row)
-            # target.write(header[i], self.array[i])
+            writer.write(formatter.format_row(row))
 
-        # writer.close()
-        return 1 # deal with the error cases
+
+        writer.close()
+        return 1  # deal with the error cases
 
 class WriteTable(object):
-    
+
     def __init__(self, format='csv', target='stdout'):
         # writers
+
         if target == 'stdout':
-            self.writer = sys.write(target) # we write to the file or whatever, but we must open!!
+            self.writer = WriteScreen
+
         # formatters
         if format == 'csv':
-            self.formatter( BuildCSV(separator = ',') )  # may require a separator
-        
-    def append(self,row):
-        self.data.append(row)
-        
-    def close(self): # a dummy for printing the screen
-        pass
-        
+            self.formatter(BuildCSV(separator=','))  # may require a separator
+
+    def write(self, line):
+        self.writer(line)
+
+    def close(self):
+        self.writer.close
+
+# there is a slight over-design here but I do not know the possible use cases yet
 class WriteScreen(WriteTable):
-    def append(self,row):
-        
+    def __init__(self):
+        self.writer = sys.stdout
+
+class BuildCSV(object):
+    def __init__(self, separator=','):
+        self.separator = separator
+
+    def format_row(self, row=[]):
+        return ''.join(row, self.separator)
