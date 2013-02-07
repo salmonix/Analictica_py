@@ -1,3 +1,4 @@
+from aConfig import Config
 from Source import Corpus
 from Data.Elements import Elements
 from Modules.Abacus import *
@@ -5,6 +6,8 @@ from Data import Tables
 
 import sys
 from pprint import pprint
+
+Config = Config()
 
 def test_for_text_tokens(elements):
     texts = elements.sentences
@@ -28,9 +31,10 @@ for (title, text) in Corpus().process(source='test'):  # I feel it awkward
 
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 # test_for_text_tokens(elements)
-print_tokens(elements.tokens)
+# print_tokens(elements.tokens)
 table = Tables.Table(elements.tokens)
-print (table.build_table(method='co_occurrence'))
-print (table.build_table(method='PMI'))
+# print (table.build_table(method='co_occurrence'))
+# print (table.build_table(method='PMI'))
 
+table.build_table(method='PMI')
 print(table.write_formatted())

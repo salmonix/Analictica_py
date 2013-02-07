@@ -60,18 +60,18 @@ class Table(object):
         return self.array
 
 
-    def write_formatted(self, writer):  # takes also : target object
+    def write_formatted(self, **kwargs):  # takes also : target object
         # if there is not table -> formatting must fail instead of creating an empty table
         # it will not work with ARRAYs  - we must write it immediately out to the passed object
+        writer = WriteTable(**kwargs)
         header = [ t.name for t in self.tokens]
-        writer.append(header)
-        for i in range(0, len(header)):
+        writer.write(header)
+        for i in range(1, len(header)):
             row = []
             row.append(header[i])
             for e in self.array[i]:
                 row.append(e)
-            writer.write(formatter.format_row(row))
-
+            writer.write(row)
 
         writer.close()
         return 1  # deal with the error cases
@@ -80,28 +80,26 @@ class WriteTable(object):
 
     def __init__(self, format='csv', target='stdout'):
         # writers
-
         if target == 'stdout':
-            self.writer = WriteScreen
+            self.target = sys.stdout
+        elif file:
+            try:
+                self.target = open(file, 'w')
+            except:
+                self.target.close()
+                raise IOError
 
         # formatters
         if format == 'csv':
-            self.formatter(BuildCSV(separator=','))  # may require a separator
+            self.formatter = lambda row : ','.join([ str(i) for i in row ]) + "\n"
+        elif format == 'table':
+            self.formatter = lambda row : row  # TODO implement a pretty-printer
 
-    def write(self, line):
-        self.writer(line)
+
+    def write(self, row=[]):
+        line = self.formatter(row)
+        self.target.write(line)
 
     def close(self):
-        self.writer.close
-
-# there is a slight over-design here but I do not know the possible use cases yet
-class WriteScreen(WriteTable):
-    def __init__(self):
-        self.writer = sys.stdout
-
-class BuildCSV(object):
-    def __init__(self, separator=','):
-        self.separator = separator
-
-    def format_row(self, row=[]):
-        return ''.join(row, self.separator)
+        self.target.close
+        return

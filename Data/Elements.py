@@ -188,7 +188,7 @@ class Sentences(object):
         sentences = self.get_sentences()
         tokens = tokens.tokens
         for sen in sentences:
-            print (sen)
+            # print (sen)
             for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
                 token = tokens[ sen[c] ]
                 for i in range(1, len(sen)):  # this is the all with all loop
