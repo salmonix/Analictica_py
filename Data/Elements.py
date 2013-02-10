@@ -45,7 +45,7 @@ class Tokens(Elements):
         self.no_of_tokens = 1
         self.tokens = []  # token id ->{token_obj}
         self.names = {}  # name -> id TODO: lookup using trie
-        self.S = 1.0
+        self.S = 1.0  # helps to fix most calculations as floats
 
     def add_token(self, data):
         """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """

@@ -1,36 +1,41 @@
-from copy import copy
-from Modules.Abacus import yuret_attraction
+from Data import Tokens
 
-def get_engine(name, elements ):
-    if name == 'trainee':
-        return Trainee( elements )
-    if name = 'tao':
-        return Tao( elements )
-    raise ValueError( name + 'is not implemented' )
+def get_engine(name, elements):
+    if name == 'Yuret':
+        return Trainee(elements)
+    raise ValueError(name + 'is not implemented')
 
 
-class Trainee(object):
-    """Learns fast, executes fast - but does not improve."""
-    def __init__(self, elements): # here we should check if 'elements' is an Elements instance
-        self.elements = elements
-        self.stack = []
-        # for fast lookup we alway take the lower element of the pair into the matrix as id
-        # XXX: it is lazy and not memory effective but I have not time to think now.
-        self.link_matrix = range( 0..elements.tokens.idx )
+class Yuret(object):
 
-    # at this point I do not check crossing links or cycles, only negative values.
-    def process_sentence( data ): # takes a sentence list
-        data = copy(data)
-        end = len(data)-1
-        p = 1
-        for p in p..0: # p = pointer
-            
-            head = data[p]
-            for tail in p..end:
+    def __init__(self,):
+        self.link_candidates = []
+        self.links = Tokens()  # we collect the links into an elements list. Always the lower tokenid is used
 
 
+    def process_sentence(data):  # takes a sentence list
+        end = len(data) - 1
+        sentence_graph = {}  #
+        tokens = self.tokens
+        p = 1  # position in the sentence
+        sp = 0  # stack pointer for the stack of links
 
-class Tao(object):
-    """It learns always - the more it learns the slower it gets - but it comes with wisdom."""
-    def __init__(self, elements):
-        self.elements = elements
+        while 1:  # take the current element
+            cycle = True  # initial value for the cycle
+            curr = tokens[ data[p] ]
+            while 1:  # check to the left
+                l = p - 1
+                PMI = curr.PMI(tokens[l])  # get the mutual information content with the token on the left
+
+                if PMI < 0 :  # negative links no accepted
+                    if p == 0 :
+                         break
+                    continue
+
+                if p - 1 != l:  # detect cycles and X loops: we walk to l from p -> if possible, it is a cycle
+                    if p in sentence_graph:
+                        paths = sentence_graph[p]
+
+
+
+
