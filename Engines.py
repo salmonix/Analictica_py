@@ -10,15 +10,16 @@ class Yuret(object):
 
     def __init__(self, tokens):
         self.link_candidates = []
-        self.links = Links()  # we collect the links into an elements list. Always the lower tokenid is used
+        self.links = Tokens()  # we collect the links into an elements list. Always the lower tokenid is used
         self.tokens = tokens
-        self.left_links = []
-        self.stack = []  # it should be stack type
-
 
     def process_sentence(data):  # takes a sentence list
         end = len(data) - 1
-        left_links = self.left_links  # list of tuples
+        left_links = []
+        stack = []
+        cycle_pointer = None
+        stack_pmi = None
+        tokens = self.tokens.tokens
 
         for r in range(1, end):  # take the right element of the link
 
@@ -27,34 +28,47 @@ class Yuret(object):
 
                 for left in left_links:  # iterate on the left_links stack
 
+                    PMI = tokens[l].PMI(tokens[r])
                     if PMI < 0 :  # negative links no accepted
-                        if p == 0 :  # we are at the end of the sentence
-                            self.store_links(links)
+                       if p == 0 :  # we are at the end of the sentence
+                           self.store_links(links)
                     continue
 
-                    if left[1] == next_to_cycle:
-                        next_to_cycle = left[0]
-
-                    if next_to_cycle == l:  # we have a cycle
-                        self.manage_cycle(stack , left, (l, r))
+                    if cycle_pointer == l:  # we have a cycle
+                        self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
                         continue
 
                     if left[0] < l and left[1] > l:
-                        self.manage_Xlink(stack, left, (l, r))
+                        self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
+                        continue
+
+                    if left[1] < l:
+                        left_links.append((l, r))
+                        break
+
+                    if left[1] == cycle_pointer:
+                        cycle_pointer = left[0]
 
                     stack.append(left)
+                    stack_pmi += PMI
 
                 left_links.append((l, r))
 
+        self.store_links(left_links)
+
 
     def store_links(self, links=[]):
+        link_tokens = self.links
+        for link in links:
+            idx = link_tokens.add_token(link[0])
+            link_tokens.tokens[idx].aux = link[1]
 
-        self.stack = 'empty'
+
+    # in these case we need the PMI of the stock against the current PMI to make a decision
+    # both methods are the same and might apply the same logic
+    def manage_Xlink(self, left, current,):
         pass
 
-    def manage_Xlink(self, left, current):
-        self.links[ left ][Xlink] = {current}
-
     def manage_cycles(self, cycle, current):
-        self.links[ left ][Xlink] = {current}
+        pass
 

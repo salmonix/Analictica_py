@@ -90,13 +90,15 @@ class Tokens(Elements):
 
 class Token(object):
     """Token object. The co_occurrence is a matter of definition."""
-    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S')
+    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'aux')
     def __init__(self, name, idx, parent, freq=1.0):
         self.name = name
         self.idx = idx
         self.freq = freq
         self.co_occurrence = {}
         self.S = parent
+        self.attribute = {}
+        self.aux = None
 
     def freq_add(self, num=1):
         self.freq += num
