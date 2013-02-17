@@ -14,43 +14,33 @@ class Yuret(object):
         self.tokens = tokens
 
     def process_sentence(self, data):  # takes a sentence list
-        end = len(data) - 1
+        end = len(data)
         links = []
         stack_pmi = 0
         # tokens = self.tokens.tokens
 
         c = 0
-        cycle_pointer = 0
-
-        for r in range(1, end + 1):  # take the right element of the link
-
+        links = [(0, 1)]
+        for r in range(1, end):  # take the right element of the link
 
             for l in range(r, -1, -1):  # the lookback loop
 
-                if l == r:
-                    continue
-
                 if not links:
                     print ('left_links is empty, so we add %d %d if PMI is positive -> next' % (l, r))
+                    print('We shall not be here, anyway...')
                     links.append((l, r))
                     continue
 
                 stack = []
 
-                print ("\nLooking for link : %d %d " % (l, r))
-                print ('   against links:' + str(links).strip('[]'))
+                print ("\nLooking for link : %d %d " % (l, r) + '   against links:' + str(links).strip('[]'))
+                cycle_pointer = links[0][1]
+                print('Initial cycle_pointer %d' % (cycle_pointer))
 
                 for link in links:  # iterate on the links stack
-                    c += 1
-                    if c == 10:
-                        import sys
-                        sys.exit()
 
-                    if link[0] == cycle_pointer:
-                        cycle_pointer = link[1]
+                    print("\n   Left link element : " + str(link).strip('[]'))
 
-                    print("\n   Link element : " + str(link).strip('[]'))
-                    print ('    Cycle pointer: %d against %d ' % (cycle_pointer, r))
                     if cycle_pointer == r:  # we have a cycle
                         # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
                         print ("    ->Cycle detected %d : %d  ->overwrite" % (l, r))
@@ -61,8 +51,14 @@ class Yuret(object):
                         print ("    ->Xlink detected %d : %d   -> skip" % (l, r))
                         continue
 
+                    # ciklus mutato nem valtozik !!
+                    if link[0] == cycle_pointer:
+                        cycle_pointer = link[1]
+
                     stack.append(link)  # if we are here -> left is ok.
-                    print ('  Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
+                    print ('  Neither cycle nor Xlink found ->')
+                    print ('    Cycle pointer: %d ' % (cycle_pointer))
+                    print ('    Stack:' + str(stack).strip('[]'))
 
                 else:
                     # stack.reverse()
@@ -71,7 +67,6 @@ class Yuret(object):
                     print (' apply stack to left_links:  LINKS:' + str(links).strip('[]'))
 
         # self.store_links(left_links)
-        # XXX we do not seem to reach this point, nor the last iteration with 4
         print ('Finally LINKS:' + str(links).strip('[]'))
 
 
