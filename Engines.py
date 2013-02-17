@@ -14,66 +14,50 @@ class Yuret(object):
         self.tokens = tokens
 
     def process_sentence(self, data):  # takes a sentence list
-        end = len(data) - 1
+        end = len(data)
         links = []
         stack_pmi = 0
+        cycle_pointer = 0
         # tokens = self.tokens.tokens
 
-        c = 0
-        cycle_pointer = 0
+        links.append((0, 1))  # initial state for the links stack
 
-        for r in range(1, end + 1):  # take the right element of the link
+        for l in range(0, end):  # take the right element of the link
 
+            for r in range(l + 1, end):
 
-            for l in range(r, -1, -1):  # the lookback loop
-
-                if l == r:
-                    continue
-
-                if not links:
-                    print ('left_links is empty, so we add %d %d if PMI is positive -> next' % (l, r))
-                    links.append((l, r))
-                    continue
-
-                stack = []
-
-                print ("\nLooking for link : %d %d " % (l, r))
-                print ('   against links:' + str(links).strip('[]'))
+                stack = []  # stack is for storing the ok links
+                cycle_pointer = 0
+                print ("\nLooking for link : %d %d " % (l, r) + ' against links:' + str(links).strip('[]'))
 
                 for link in links:  # iterate on the links stack
-                    c += 1
-                    if c == 10:
-                        import sys
-                        sys.exit()
 
                     if link[0] == cycle_pointer:
                         cycle_pointer = link[1]
 
-                    print("\n   Link element : " + str(link).strip('[]'))
-                    print ('    Cycle pointer: %d against %d ' % (cycle_pointer, r))
+                    print("\n    Link element : " + str(link).strip('[]'))
+                    print('    Cycle pointer %d' % (cycle_pointer))
                     if cycle_pointer == r:  # we have a cycle
                         # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
-                        print ("    ->Cycle detected %d : %d  ->overwrite" % (l, r))
+                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  ->overwrite" % (cycle_pointer, l, r))
                         continue
 
-                    if link[0] < r and link[1] > r:
+                    if link[0] < l and link[1] < r:
                         # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
-                        print ("    ->Xlink detected %d : %d   -> skip" % (l, r))
+                        print ("    --> Xlink detected as %d < %d and %d < %d   -> overwrite" % (link[0], l, link[1], r))
                         continue
 
                     stack.append(link)  # if we are here -> left is ok.
-                    print ('  Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
+                    print ('    Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
 
                 else:
                     # stack.reverse()
                     links = stack + [(l, r)]
-                    print (' Stack:' + str(stack).strip('[]'))
-                    print (' apply stack to left_links:  LINKS:' + str(links).strip('[]'))
+                    print ('EOL: stack + (%d,%d) -> Links:' % (l, r) + str(links).strip('[]'))
 
         # self.store_links(left_links)
-        # XXX we do not seem to reach this point, nor the last iteration with 4
-        print ('Finally LINKS:' + str(links).strip('[]'))
 
+        print ("\n### Finally LINKS:" + str(links).strip('[]'))
 
 
     def store_links(self, links=[]):
