@@ -42,7 +42,7 @@ class Yuret(object):
                         print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  ->overwrite" % (cycle_pointer, l, r))
                         continue
 
-                    if link[0] < l and link[1] < r:
+                    if link[0] < l and link[1] > l and link[1] < r:
                         # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
                         print ("    --> Xlink detected as %d < %d and %d < %d   -> overwrite" % (link[0], l, link[1], r))
                         continue
