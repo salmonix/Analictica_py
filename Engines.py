@@ -17,43 +17,72 @@ class Yuret(object):
         end = len(data)
         links = []
         stack_pmi = 0
-
-        # tokens = self.tokens.tokens
+        cycle_pointer = 0
+        tokens = self.tokens.tokens
+        found_links = []
 
         links.append((0, 1))  # initial state for the links stack
 
-        for r in range(1, end):  # take the right element of the link
-
+        for r in range(2, end):  # take the right element of the link
+            # right = tokens[ data[r]]
             for l in range(r - 1, 0, -1):
 
-                stack = []  # stack is for storing the ok links
-                cycle_pointer = 0
+#                PMI = right.PMI( tokens[ data[l]] )
+#                if PMI <=0:
+#                    continue
+
                 print ("\nLooking for link : %d %d " % (l, r) + ' against links:' + str(links).strip('[]'))
+                accepted = []  # stack is for storing the ok links
+                Xlinks = []
+                stack = []  # actual storage -> links under consideration
+                cycle_pointer = None
 
                 for link in links:  # iterate on the links stack
 
-                    if link[0] == cycle_pointer:
-                        cycle_pointer = link[1]
-
-                    print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer %d' % (cycle_pointer))
-                    if cycle_pointer == r:  # we have a cycle
-                        # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
-                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  ->overwrite" % (cycle_pointer, l, r))
+                    if  link[0] < l and link[1] <= l:  # out of our present investigation window
+                        # print('# Found out of range link' + str(link))
+                        stack  .append(link)  # good links
                         continue
 
+                    # first check for Xlinks
                     if link[0] < l and link[1] > l and link[1] < r:
-                        # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
-                        print ("    --> Xlink detected as %d < %d and %d < %d   -> overwrite" % (link[0], l, link[1], r))
+                        print ("    --> Xlink detected as %d < %d and %d < %d   -> stackin'" % (link[0], l, link[1], r))
+                        Xlinks.append(link)
                         continue
 
-                    stack.append(link)  # if we are here -> left is ok.
-                    print ('    Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
+                    if Xlinks:
+                        print ("     ----> make an Xlink decision on " + str(Xlinks).strip('[]'))
+                        # after decision continue checking against links
+                        # if older links are eliminated we still have to look for cycles with the new link
 
-                else:
-                    links = stack + [(l, r)]
+                    # if the new link fails on the second test we have to restore the eliminated Xlinks
+                    # because the link is purely destructive
+
+                    # check for Cycles
+                    if cycle_pointer == link[0] or link[0] == l:
+                        print("\n   Initialize cycle pointer as " + str(link[1]) + ' using first valid link: ' + str(link))
+                        cycle_pointer = link[1]
+                        cycle_item_counter = 1
+                    else:
+                        print('   Cycle pointer ' + str (cycle_pointer))
+
+                    stack.append(link)
+                    print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer ' + str(cycle_pointer))
+                    if cycle_pointer == r:  # we have a cycle
+                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  -> decide" % (cycle_pointer, l, r))
+                        # so here we do something with the stack -> change or keep
+                        # if stack.pmi < PMI:
+                        #     stack =[] # we will add l,r at the end ?
+                        # else:
+                        #   continue
+                        continue
+
+
+                else:  # evaluate
+                    print('  Xlinks : ' + str(Xlinks))
+                    links = accepted + [(l, r)]
                     print ("\nEOL: stack + (%d,%d) -> Links:" % (l, r) + str(links).strip('[]'))
 
-        # self.store_links(left_links)
         print ("\n### Finally LINKS:" + str(links).strip('[]'))
 
 
