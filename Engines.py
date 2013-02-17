@@ -2,7 +2,7 @@ from Data.Elements import Tokens
 
 def get_engine(name, elements):
     if name == 'Yuret':
-        return Trainee(elements)
+        pass
     raise ValueError(name + 'is not implemented')
 
 
@@ -15,50 +15,65 @@ class Yuret(object):
 
     def process_sentence(self, data):  # takes a sentence list
         end = len(data) - 1
-        left_links = []
-        stack = []
-        cycle_pointer = 0
+        links = []
         stack_pmi = 0
         # tokens = self.tokens.tokens
 
-        for r in range(1, end):  # take the right element of the link
-            print ("%d is right" % (r))
+        c = 0
+        cycle_pointer = 0
 
-            for l in range(r - 1, end):  # the nested all with all loop
+        for r in range(1, end + 1):  # take the right element of the link
 
-                print ("%d is left" % (l))
-                for left in left_links:  # iterate on the left_links stack
-                    PMI = 1
-                    # PMI = tokens[l].PMI(tokens[r])
-                    # if PMI < 0 :  # negative links no accepted
-                    #   if p == 0 :  # we are at the end of the sentence
-                    #       self.store_links(links)
-                    # continue
 
-                    if cycle_pointer == l:  # we have a cycle
-                        self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
+            for l in range(r, -1, -1):  # the lookback loop
+
+                if l == r:
+                    continue
+
+                if not links:
+                    print ('left_links is empty, so we add %d %d if PMI is positive -> next' % (l, r))
+                    links.append((l, r))
+                    continue
+
+                stack = []
+
+                print ("\nLooking for link : %d %d " % (l, r))
+                print ('   against links:' + str(links).strip('[]'))
+
+                for link in links:  # iterate on the links stack
+                    c += 1
+                    if c == 10:
+                        import sys
+                        sys.exit()
+
+                    if link[0] == cycle_pointer:
+                        cycle_pointer = link[1]
+
+                    print("\n   Link element : " + str(link).strip('[]'))
+                    print ('    Cycle pointer: %d against %d ' % (cycle_pointer, r))
+                    if cycle_pointer == r:  # we have a cycle
+                        # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
+                        print ("    ->Cycle detected %d : %d  ->overwrite" % (l, r))
                         continue
 
-                    if left[0] < l and left[1] > l:
-                        self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
+                    if link[0] < r and link[1] > r:
+                        # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
+                        print ("    ->Xlink detected %d : %d   -> skip" % (l, r))
                         continue
 
-                    if left[1] < l:
-                        left_links.append((l, r))
-                        break
+                    stack.append(link)  # if we are here -> left is ok.
+                    print ('  Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
 
-                    if left[1] == cycle_pointer:
-                        cycle_pointer = left[0]
+                else:
+                    # stack.reverse()
+                    links = stack + [(l, r)]
+                    print (' Stack:' + str(stack).strip('[]'))
+                    print (' apply stack to left_links:  LINKS:' + str(links).strip('[]'))
 
-                    stack.append(left)
-                    stack_pmi += PMI
+        # self.store_links(left_links)
+        # XXX we do not seem to reach this point, nor the last iteration with 4
+        print ('Finally LINKS:' + str(links).strip('[]'))
 
-                    left_links.append((l, r))
-                    # problems: 1 we have multiple entries - a link that exists turns up several times
-                    # I see not that it enters the cycle and Xlink managers
-                    # we do not delete the Xlinks and Cycles at this point -> TODO
-
-        self.store_links(left_links)
 
 
     def store_links(self, links=[]):
