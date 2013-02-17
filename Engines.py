@@ -22,9 +22,9 @@ class Yuret(object):
 
         links.append((0, 1))  # initial state for the links stack
 
-        for l in range(0, end):  # take the right element of the link
+        for r in range(1, end):  # take the right element of the link
 
-            for r in range(l + 1, end):
+            for l in range(r - 1, 0, -1):
 
                 stack = []  # stack is for storing the ok links
                 cycle_pointer = 0
@@ -35,8 +35,7 @@ class Yuret(object):
                     if link[0] == cycle_pointer:
                         cycle_pointer = link[1]
 
-                    print("\n    Link element : " + str(link).strip('[]'))
-                    print('    Cycle pointer %d' % (cycle_pointer))
+                    print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer %d' % (cycle_pointer))
                     if cycle_pointer == r:  # we have a cycle
                         # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
                         print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  ->overwrite" % (cycle_pointer, l, r))
@@ -51,9 +50,8 @@ class Yuret(object):
                     print ('    Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
 
                 else:
-                    # stack.reverse()
                     links = stack + [(l, r)]
-                    print ('EOL: stack + (%d,%d) -> Links:' % (l, r) + str(links).strip('[]'))
+                    print ("\nEOL: stack + (%d,%d) -> Links:" % (l, r) + str(links).strip('[]'))
 
         # self.store_links(left_links)
 
