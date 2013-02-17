@@ -17,58 +17,44 @@ class Yuret(object):
         end = len(data)
         links = []
         stack_pmi = 0
+
         # tokens = self.tokens.tokens
 
-        c = 0
-        links = [(0, 1)]
+        links.append((0, 1))  # initial state for the links stack
+
         for r in range(1, end):  # take the right element of the link
 
-            for l in range(r, -1, -1):  # the lookback loop
+            for l in range(r - 1, 0, -1):
 
-                if not links:
-                    print ('left_links is empty, so we add %d %d if PMI is positive -> next' % (l, r))
-                    print('We shall not be here, anyway...')
-                    links.append((l, r))
-                    continue
-
-                stack = []
-
-                print ("\nLooking for link : %d %d " % (l, r) + '   against links:' + str(links).strip('[]'))
-                cycle_pointer = links[0][1]
-                print('Initial cycle_pointer %d' % (cycle_pointer))
+                stack = []  # stack is for storing the ok links
+                cycle_pointer = 0
+                print ("\nLooking for link : %d %d " % (l, r) + ' against links:' + str(links).strip('[]'))
 
                 for link in links:  # iterate on the links stack
 
-                    print("\n   Left link element : " + str(link).strip('[]'))
-
-                    if cycle_pointer == r:  # we have a cycle
-                        # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
-                        print ("    ->Cycle detected %d : %d  ->overwrite" % (l, r))
-                        continue
-
-                    if link[0] < r and link[1] > r:
-                        # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
-                        print ("    ->Xlink detected %d : %d   -> skip" % (l, r))
-                        continue
-
-                    # ciklus mutato nem valtozik !!
                     if link[0] == cycle_pointer:
                         cycle_pointer = link[1]
 
+                    print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer %d' % (cycle_pointer))
+                    if cycle_pointer == r:  # we have a cycle
+                        # stack = self.manage_cycle((l, r), PMI, stack, stack_pmi, left)
+                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  ->overwrite" % (cycle_pointer, l, r))
+                        continue
+
+                    if link[0] < l and link[1] > l and link[1] < r:
+                        # stack = self.manage_Xlink((l, r), PMI, stack, stack_pmi, left)
+                        print ("    --> Xlink detected as %d < %d and %d < %d   -> overwrite" % (link[0], l, link[1], r))
+                        continue
+
                     stack.append(link)  # if we are here -> left is ok.
-                    print ('  Neither cycle nor Xlink found ->')
-                    print ('    Cycle pointer: %d ' % (cycle_pointer))
-                    print ('    Stack:' + str(stack).strip('[]'))
+                    print ('    Neither cycle nor Xlink found -> link added to stack ' + str(stack).strip('[]'))
 
                 else:
-                    # stack.reverse()
                     links = stack + [(l, r)]
-                    print (' Stack:' + str(stack).strip('[]'))
-                    print (' apply stack to left_links:  LINKS:' + str(links).strip('[]'))
+                    print ("\nEOL: stack + (%d,%d) -> Links:" % (l, r) + str(links).strip('[]'))
 
         # self.store_links(left_links)
-        print ('Finally LINKS:' + str(links).strip('[]'))
-
+        print ("\n### Finally LINKS:" + str(links).strip('[]'))
 
 
     def store_links(self, links=[]):
