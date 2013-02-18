@@ -20,6 +20,7 @@ class Yuret(object):
         cycle_pointer = 0
         tokens = self.tokens.tokens
         found_links = []
+        # here will be a function to sum PMIs
 
         links.append((0, 1))  # initial state for the links stack
 
@@ -41,7 +42,7 @@ class Yuret(object):
 
                     if  link[0] < l and link[1] <= l:  # out of our present investigation window
                         # print('# Found out of range link' + str(link))
-                        stack  .append(link)  # good links
+                        stack.append(link)  # good links
                         continue
 
                     # first check for Xlinks
@@ -52,11 +53,16 @@ class Yuret(object):
 
                     if Xlinks:
                         print ("     ----> make an Xlink decision on " + str(Xlinks).strip('[]'))
-                        # after decision continue checking against links
-                        # if older links are eliminated we still have to look for cycles with the new link
+                        print("     -----> sum(stack) cmp l")
+                        sum_stack = sum(Xlink[0] for Xlink in Xlinks)
+                        print("         SUM(Xlinks): %d    link value: %d" % (sum_stack, l * r))
+                        if r * l > sum_stack:
+                            Xlinks = None
+                        else:
+                            break  # this is a bad link
 
                     # if the new link fails on the second test we have to restore the eliminated Xlinks
-                    # because the link is purely destructive
+                    # because the link is purely destructive -> I need my example...
 
                     # check for Cycles
                     if cycle_pointer == link[0] or link[0] == l:
