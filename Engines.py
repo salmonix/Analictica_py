@@ -33,8 +33,8 @@ class Yuret(object):
 #                    continue
 
                 print ("\nLooking for link : %d %d " % (l, r) + ' against links:' + str(links).strip('[]'))
-                accepted = []  # stack is for storing the ok links
                 Xlinks = []
+                Cycles = []
                 stack = []  # actual storage -> links under consideration
                 cycle_pointer = None
 
@@ -54,9 +54,9 @@ class Yuret(object):
                     if Xlinks:
                         print ("     ----> make an Xlink decision on " + str(Xlinks).strip('[]'))
                         print("     -----> sum(stack) cmp l")
-                        sum_stack = sum(Xlink[0] for Xlink in Xlinks)
-                        print("         SUM(Xlinks): %d    link value: %d" % (sum_stack, l * r))
-                        if r * l > sum_stack:
+                        sum_stack = sum(Xlink[1] * Xlink[0] + 1 for Xlink in Xlinks)
+                        print("         SUM(Xlinks): %d    link value: %d" % (sum_stack, r - l))
+                        if r - l > sum_stack:
                             Xlinks = None
                         else:
                             break  # this is a bad link
@@ -68,11 +68,11 @@ class Yuret(object):
                     if cycle_pointer == link[0] or link[0] == l:
                         print("\n   Initialize cycle pointer as " + str(link[1]) + ' using first valid link: ' + str(link))
                         cycle_pointer = link[1]
-                        cycle_item_counter = 1
+                        Cycles.append(link)
+                        continue
                     else:
                         print('   Cycle pointer ' + str (cycle_pointer))
 
-                    stack.append(link)
                     print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer ' + str(cycle_pointer))
                     if cycle_pointer == r:  # we have a cycle
                         print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  -> decide" % (cycle_pointer, l, r))
@@ -81,12 +81,20 @@ class Yuret(object):
                         #     stack =[] # we will add l,r at the end ?
                         # else:
                         #   continue
+                        sum_stack = sum(cyc[0] + 1 * cyc[1] for cyc in Cycles)
+                        print("         SUM(Cycles): %d    link value: %d" % (sum_stack, r - l))
+                        if r - l > sum_stack:
+                            Cycles = None
+                            stack = stack + cycles
+                        else:
+                            stack.append(link)
                         continue
 
+                    stack.append(link)
 
                 else:  # evaluate
                     print('  Xlinks : ' + str(Xlinks))
-                    links = accepted + [(l, r)]
+                    links = stack + [(l, r)]
                     print ("\nEOL: stack + (%d,%d) -> Links:" % (l, r) + str(links).strip('[]'))
 
         print ("\n### Finally LINKS:" + str(links).strip('[]'))
