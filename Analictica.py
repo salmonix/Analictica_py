@@ -24,8 +24,11 @@ print (table.build_table(method='PMI'))
 print(table.write_formatted())
 
 
-# from Engines import Yuret
-# Yur = Yuret(Elements.tokens)  # initialize the engine with the primal dataset
+from Engines import Yuret
+Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
 
-# [ Yur.process_sentence(d) for d in data ]  # process the dataset
+[ Yur.process_sentence(s) for s in elements.sentences.get_sentences() ]  # process the dataset. Yes, we can make it iter as we did with Elements
+
+
+
 

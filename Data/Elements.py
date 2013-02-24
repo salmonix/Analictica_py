@@ -1,11 +1,5 @@
 import re
 from math import log
-from copy import copy
-
-
-
-from Modules.Abacus import entropy, probability
-
 
 # CAVEAT: the sentence head token is hard coded as id 0
 class Elements(object):
@@ -17,15 +11,14 @@ class Elements(object):
         self.sentences = Sentences()
         if datasource:
             for (title, tlist) in datasource:
-                self.add_tokenlist(title, tlist)
+                self.add_sentence_of_tokens(title, tlist)
 
-# XXX perhaps not the best name
-    def add_tokenlist(self, title, tokenlist):
+    def add_sentence_of_tokens(self, title, tokenlist):
         """Convenience method to process a sentence into the text and token containers."""
 
         self.sentences.add_text(title)
         tokenlist.insert(0, '_head_')
-        idx = self.tokens.add_token(tokenlist)
+        idx = self.tokens.add_tokenlist(tokenlist)
 
         self.sentences.add_token_ids(idx)
 
@@ -43,15 +36,16 @@ class Tokens(Elements):
         self.names = {}  # name -> id TODO: lookup using trie
         self.S = 1.0  # helps to fix most calculations as floats
 
-    def add_token(self, data):
+    # add_tokenlist
+    def add_tokenlist(self, data):
         """ Takes a list of tokens and stores them the tokenlist instance. Returns the index number(s) for the token. """
 
         idxs = []
         for i in data:
-            idxs.append(self._add_token(str(i)))
+            idxs.append(self.add_token(str(i)))
         return idxs
 
-    def _add_token(self, name, parent={}, children={}):
+    def add_token(self, name, parent={}, children={}):
         self.S += 1
         if  name in self.names :  # token exists
             token = self.names[ name ]
@@ -80,18 +74,30 @@ class Tokens(Elements):
         self.tokens[token].freq_add(num)
         return self.tokens[token].freq
 
+class Links(Tokens):
+    """Links are Tokens, only differ that their name is a tuple and their attribute is the link_PMI."""
+
+    # XXX we may have a smart relation handler later, but now I just want to make it work
+    def add_tokenlist(self, data):
+        """ Takes a list of links and stores them the tokenlist instance. Returns the index number(s) for the token. """
+
+        idxs = []
+        for i in data:
+            idx = (self.add_token((i[0], i[1])))
+            self.tokens[idx].link_PMI(i[2])
+
+        return idxs
 
 class Token(object):
     """Token object. The co_occurrence is a matter of definition."""
-    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'aux')
+    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute')
     def __init__(self, name, idx, parent, freq=1.0):
         self.name = name
         self.idx = idx
         self.freq = freq
         self.co_occurrence = {}
         self.S = parent
-        self.attribute = {}
-        self.aux = None
+        self.attribute = ()
 
     def freq_add(self, num=1):
         self.freq += num
@@ -135,9 +141,23 @@ class Token(object):
         """Pointwise Mutual Information PMI(A|B) = p(A&B) / p(A)xp(B)"""
         # print ('CO_OCC:' + str(self.co_occurrence))
         if B.idx in self.co_occurrence:
-            return -1 * log(2, (self.co_occurrence[B.idx] * self.Space) / (self.freq * B.freq))
+            return log(2, (self.co_occurrence[B.idx] * self.Space) / (self.freq * B.freq))
         else:
             return 0.0
+
+class Link(Token):
+    """Links are Tokens, only differ that their name is a tuple and their attribute is the link_PMI."""
+
+    def recall_linkname(self, link):
+        """Returns a tuple of the token names the link is built of."""
+        pass
+
+    def link_PMI(self, PMI=None):
+        if PMI:
+            self.attribute[0] = PMI
+        else:
+            return self.attribute[0]
+
 
 class Sentences(object):
     """Text container: stores the text transformed into sequences of token index numbers."""

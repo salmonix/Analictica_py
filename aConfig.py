@@ -65,12 +65,13 @@ class ConfigSources(object):
 # a Borg.
 class Config(object):
 
-    _shared_state = { '_sources' : ConfigSources() }
+    _shared_state = { '_sources' : ConfigSources(),
+                    }
 
     # configurator functions shall return a key -> object pair with the appropriate object stored in
     def __init__(self):
         self.__dict__ = self._shared_state
-        self.runmode = None
+        self.runmode = 'CRITICAL'
 
     def sources(self, source=None):
         if source != None:

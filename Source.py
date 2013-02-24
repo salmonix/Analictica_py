@@ -25,7 +25,7 @@ class Corpus(object):
         self.title = source.lower()
         self.source = Config().sources(source)
 
-    # this can be a decorator ( but I doubt we'll need that )
+    # this can be a decorator ( but I doubt we'll need that. This is a logical step closing a read_in process )
     def tokenize_source(self, sentencer=None,  # that is equal to none.
                               tokenizer=None,
                               language=None):
@@ -61,7 +61,6 @@ class Txt(object):
     def read_in(self):
         with open(self.path, 'r') as f:
             file_string = f.read()
-        f.close()
         title = os.path.basename(self.path)
 
         yield title, [ file_string ]
