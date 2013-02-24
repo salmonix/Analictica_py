@@ -17,19 +17,34 @@ class ConfigSource(object):
 
     @property
     def path(self):
+        """ file like instances have path attribute. returns iterator of filenames """
+        if not 'path' in self.__dict__:
+            raise '"path" attribute is missing for this source'
+            return
+
         path = self.__dict__['path']
 
         if os.path.isdir(path):
             try:
                 for f in os.listdir(path):
-                    print (f)
-                    fpath = os.path.join(path, f)
-                    base = os.path.basename(f)
-                    yield base, fpath
+                    checked = self._check_path(os.path.join(path, f))
+                    if checked:
+                        yield checked
+                    else:
+                        continue
+
             except:
                 print(' We have some error... ?')
         else:
-            yield os.path.basename(path), path
+            yield self._check_path(path)
+
+    # this is to catch the missing path early at startup
+    def _check_path(self, fpath):
+        if os.path.exists(fpath):
+            return fpath
+        else:
+            assert "Not existing: " + fpath
+            return None
 
 
 class ConfigSources(object):
@@ -64,5 +79,7 @@ class Config(object):
         return self._sources
 
 
-a = Config().sources()
-print(a.__dict__)
+# a = Config().sources('test')
+# print(a.__dict__)
+# print a.path
+# print a.sourcetype

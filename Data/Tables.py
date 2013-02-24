@@ -5,7 +5,8 @@ import sys
 class Table(object):
     def __init__(self, tokens):
         self.tokens = tokens.tokens
-        dim = tokens.S - 1  # space starts from 1, lists from 0
+        dim = tokens.idx - 1  # space starts from 1, lists from 0
+        print dim
         self.array = zeros((dim, dim), dtype=float)  # the given tablespace is always overwritten
 
     # simple tables
@@ -41,7 +42,7 @@ class Table(object):
 
             elif hasattr(yMethod, '__call__'):  # callable
                 try:
-                    fun = partial(yMethod)  # Currying XXX: does it improve speed?
+                    fun = partial(yMethod)  # not faster but clearer
                 except:
                     raise ValueError('Unable to get partial function from method ' + str(method))
 
@@ -51,7 +52,7 @@ class Table(object):
                         y = self.tokens[yTokenId].idx
                         self.array[x][y] = fun(self.tokens[yTokenId])
                 except:
-                    print ('Exception')
+                    assert'Exception'
                     next
 
             else:
@@ -69,13 +70,14 @@ class Table(object):
         for i in range(1, len(header)):
             row = []
             row.append(header[i])
-            for e in self.array[i]:
+            for e in self.array[i - 1]:
                 row.append(e)
             writer.write(row)
 
         writer.close()
         return 1  # deal with the error cases
 
+# should go into an Exporters namespace
 class WriteTable(object):
 
     def __init__(self, format='csv', target='stdout'):

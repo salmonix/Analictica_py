@@ -10,17 +10,17 @@ class Tokenizer(object):
         language(str)  -> additional parameter to the aboves. default: none. """
 
         if not tokenizer:
-            self.tokenizer = lambda x : x.split()
+            self.tokenize = lambda x : [ d for d in x.split() if d ]
             return
         # try to load the non default tokenizers
         try:
             if tokenizer == 'PunktWord':
-                self.tokenizer = PunktWordTokenizer()
+                self.tokenize = PunktWordTokenizer().tokenize
         except:
             raise ValueError(tokenizer + " tokenizer not implemented")
 
     def get_tokens(self, string):
-        return self.tokenizer.tokenize(string)
+        return self.tokenize(string)
 
 class Sentencer(object):
     """Initialized with a sentencer and language parameter it stores the language related sentencer.
@@ -33,7 +33,7 @@ class Sentencer(object):
     def __init__(self, sentencer, language):
 
         if not sentencer:
-            self.sentencer = lambda x : x
+            self._sentencer = lambda x : [ d for d in x.split('\n') if d ]
             return
 
         # try to load the non default sentencers
@@ -54,6 +54,8 @@ class Sentencer(object):
         self.data = []
 
     def process(self, string):
+        if self._sentencer:
+            return self._sentencer(string)
         """ Takes a string and returns a list of sentences. Non-comma punctuation is turned into . and whitespaces are removed. """
         e = Sentencer.normal_punct.sub(' .', string)
         e = Sentencer.rm_noise.sub(' ', e)

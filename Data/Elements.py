@@ -9,11 +9,15 @@ from Modules.Abacus import entropy, probability
 
 # CAVEAT: the sentence head token is hard coded as id 0
 class Elements(object):
-    """Object containing obj.tokens and obj.texts."""
+    """Object containing obj.tokens and obj.texts. Optional argument: 
+    datasource : iterator, that returns a 'tite', 'tokenlist' tuple"""
 
-    def __init__(self):
+    def __init__(self, datasource=None):
         self.tokens = Tokens()
         self.sentences = Sentences()
+        if datasource:
+            for (title, tlist) in datasource:
+                self.add_tokenlist(title, tlist)
 
 # XXX perhaps not the best name
     def add_tokenlist(self, title, tokenlist):
@@ -156,7 +160,7 @@ class Sentences(object):
         self.text[ self.active ].append(idxs)
 
     def get_text(self, title=[]):
-        """Returns a title, text list tuple for the given text titles. If nothing is passed returns for all."""
+        """Returns a title, text list iterator -> tuple for the given text titles. If nothing is passed returns for all."""
 
         # XXX name changed : get_text
         if title == []:
@@ -177,7 +181,7 @@ class Sentences(object):
         sentences = self.get_sentences()
         tokens = tokens.tokens
         for sen in sentences:
-            # print (sen)
+         #   print (sen)
             for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
                 token = tokens[ sen[c] ]
                 for i in range(1, len(sen)):  # this is the all with all loop
@@ -186,4 +190,4 @@ class Sentences(object):
                             token.co_occurrence[ sen[i] ] += 1
                         else:
                             token.co_occurrence[ sen[i] ] = 1
-                    # print (" %d : %d " % (c, i))
+        #            print (" %d : %d " % (c, i))

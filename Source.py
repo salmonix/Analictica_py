@@ -17,8 +17,8 @@ class Corpus(object):
 
     @staticmethod
     def _reader_factory(con_type, con_params):
-        if con_type == "Txt": return Txt(con_params).read_in()
-        if con_type == "ATU": return ATU(con_params).read_in()
+        if con_type == "Txt": return Txt(con_params)
+        if con_type == "ATU": return ATU(con_params)
         raise ValueError(con_type + ' is not recognized type')
 
     def __init__(self, source):
@@ -38,7 +38,7 @@ class Corpus(object):
         self.tokenizer = Tokenizer(tokenizer, language)
 
         for (title, text) in self.read_data():
-            for s in self.sentencer.process(data):
+            for s in self.sentencer.process(text):
                 tokens = self.tokenizer.get_tokens(s)
                 yield title, tokens
 
@@ -47,24 +47,26 @@ class Corpus(object):
         """Returns an iterator of ( 'title', 'line' )"""
 
         for spath in self.source.path:  # iterate the source paths ( can be multiple )
-            read_in = Corpus._reader_factory(self.source.sourcetype, source.path)  # it returns the proper read_in iterator for the source
-            for text in read_in:
+            Source_obj = Corpus._reader_factory(self.source.sourcetype, spath)  # it returns the proper read_in iterator for the source
+            for title, text in Source_obj.read_in():  # read in reads the whole file
                 for i in text:
                     yield title, i
 
 
 class Txt(object):
     """Load a txt file. The class requires 'path' parameter. """
-    def __init__(self, source):
-        self.source = source['path']  # place for further checks etc.
+    def __init__(self, path):
+        self.path = path  # place for further checks etc.
 
     def read_in(self):
-        with open(self.source, 'r') as f:
+        with open(self.path, 'r') as f:
             file_string = f.read()
         f.close()
-        return [ file_string ]
+        title = os.path.basename(self.path)
 
-# clear it up, check regexp etc.
+        yield title, [ file_string ]
+
+# clear it up, check regexp etc. -> this should be a tokenizer!
 class ATU(Txt):
     """Reads an ATU, which is a type of text file. Requires 'path' parameter."""
     # closures_cfs = re.compile('\[.*?\]|cf\..*?\.')
@@ -72,6 +74,6 @@ class ATU(Txt):
         super(ATU, self).__init__(source)  # python3: super().__init__( source )
 
     def read_in(self):
-        data = super(ATU, self).read_in()
+        txt_iterator = super(ATU, self).read_in()
         # data = closures_cfs.sub('', data)
-        return data
+        return txt_iterator
