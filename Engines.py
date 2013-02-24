@@ -14,115 +14,94 @@ class Yuret(object):
         self.tokens = tokens
 
     def process_sentence(self, data):  # takes a sentence list
+
         end = len(data)
+        # links are: ( l, r, link_value ), where: l - r are positional values in data list, link_value is the calculated pmi.
         links = []
-        stack_pmi = 0
         cycle_pointer = 0
         tokens = self.tokens.tokens
-        found_links = []
-        # here will be a function to sum PMIs
+        stringit = lambda x : str(x).strip('[]')
+
+        print('Sentence received : ' + stringit(data))
 
         links.append((0, 1))  # initial state for the links stack
 
         for r in range(2, end):  # take the right element of the link
-            # right = tokens[ data[r]]
+            right = tokens[ data[r]]
             for l in range(r - 1, 0, -1):
 
-#                PMI = right.PMI( tokens[ data[l]] )
-#                if PMI <=0:
-#                    continue
+                link_value = right.PMI(tokens[ data[r]])
+                if link_value <= 0:
+                    continue
 
-                print ("\nLooking for link : %d %d " % (l, r) + ' against links:' + str(links).strip('[]'))
+                print ("\n  Looking for link : %d %d " % (l, r) + ' against links:' + stringit(links))
                 Xlinks = []
                 Cycles = []
-                stack = []  # actual storage -> links under consideration
                 cycle_pointer = None
+                stack = []  # actual storage because we do not want to change 'links' in the loop
 
                 for link in links:  # iterate on the links stack
 
                     if  link[0] < l and link[1] <= l:  # out of our present investigation window
                         # print('# Found out of range link' + str(link))
+                        print('    append good link %s' % (stringit(link)))
                         stack.append(link)  # good links
                         continue
 
-                    # first check for Xlinks
+                    # first check for Xlinks -> Xlink can be a start of the cycle
                     if link[0] < l and link[1] > l and link[1] < r:
-                        print ("    --> Xlink detected as %d < %d and %d < %d   -> stackin'" % (link[0], l, link[1], r))
+                        print ("    ---> Xlink detected as %d < %d and %d < %d   -> stackin'" % (link[0], l, link[1], r))
                         Xlinks.append(link)
                         continue
 
                     if Xlinks:
-                        print ("     ----> make an Xlink decision on " + str(Xlinks).strip('[]'))
-                        print("     -----> sum(stack) cmp l")
-                        sum_stack = sum(Xlink[1] * Xlink[0] + 1 for Xlink in Xlinks)
+                        print("     ----> make an Xlink decision on " + stringit(Xlinks))
+                        print("      ----> sum(stack) cmp l")
+                        sum_stack = sum(Xlink[2] for Xlink in Xlinks)  # this is the stack PMI-> sum of link PMIs
                         print("         SUM(Xlinks): %d    link value: %d" % (sum_stack, r - l))
-                        if r - l > sum_stack:
+                        if link_value > sum_stack:  # stronger link: drop the others, keep this
                             Xlinks = None
                         else:
+                            print('      ----> Link is BAD link : keeping all unchanged: ' + stringit(links))
                             break  # this is a bad link
-
-                    # if the new link fails on the second test we have to restore the eliminated Xlinks
-                    # because the link is purely destructive -> I need my example...
 
                     # check for Cycles
                     if cycle_pointer == link[0] or link[0] == l:
-                        print("\n   Initialize cycle pointer as " + str(link[1]) + ' using first valid link: ' + str(link))
+                        print("\n   Set cycle pointer as " + str(link[1]) + ' using stored link: ' + str(link))
                         cycle_pointer = link[1]
                         Cycles.append(link)
                         continue
                     else:
-                        print('   Cycle pointer ' + str (cycle_pointer))
+                        print('   Cycle pointer ' + str(cycle_pointer))
 
-                    print("\n    Link element : " + str(link).strip('[]') + ' && cycle_pointer ' + str(cycle_pointer))
-                    if cycle_pointer == r:  # we have a cycle
-                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  -> decide" % (cycle_pointer, l, r))
-                        # so here we do something with the stack -> change or keep
-                        # if stack.pmi < PMI:
-                        #     stack =[] # we will add l,r at the end ?
-                        # else:
-                        #   continue
-                        sum_stack = sum(cyc[0] + 1 * cyc[1] for cyc in Cycles)
-                        print("         SUM(Cycles): %d    link value: %d" % (sum_stack, r - l))
-                        if r - l > sum_stack:
-                            Cycles = None
-                            stack = stack + cycles
-                        else:
-                            stack.append(link)
-                        continue
+                    print("\n    Link element : " + stringit(link) + ' && cycle_pointer ' + str(cycle_pointer))
 
                     stack.append(link)
 
                 else:  # evaluate
-                    print('  Xlinks : ' + str(Xlinks))
-                    links = stack + [(l, r)]
-                    print ("\nEOL: stack + (%d,%d) -> Links:" % (l, r) + str(links).strip('[]'))
 
-        print ("\n### Finally LINKS:" + str(links).strip('[]'))
+                    if cycle_pointer == r:  # check for cycle
+                        print ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  -> decide" % (cycle_pointer, l, r))
+                        sum_stack = sum(cyc[2] for cyc in Cycles)
+                        print("         SUM(Cycles): %d    link value: %d" % (sum_stack, link_value))
+                        if link_value < sum_stack:  # bad link
+                            print('      ----> Link is BAD link : keeping stack + Cycles : %s + %s' % (stringit(stack), stringit(Cycles)))
+                            stack = stack + Cycles
+                        else:
+                            print('      ----> link is kept, Cycles  %s dropped' % (stringit(Cycles)))
+                            links = stack + [(l, r, link_value)]
+                    else:  # no cycle
+                        links = stack + [(l, r, link_value)]
+                        print ("\nEOL: Links %s + (%d,%d). -> %s " % (stringit(stack), l, r, stringit(links)))
+
+        print ("\n### Finally LINKS:" + stringit(links))
+        self.store_links(links)
 
 
     def store_links(self, links=[]):
-        pass
         link_tokens = self.links
         for link in links:
             # idx = link_tokens.add_token(link[0])
             # link_tokens.tokens[idx].aux = link[1]
             print "LINKS"
             print(links)
-
-
-    # in these case we need the PMI of the stock against the current PMI to make a decision
-    # both methods are the same and might apply the same logic
-    def manage_Xlink(self, current, PMI, stack, stack_pmi, left):
-        print 'Xlinks:'
-        print current
-        print stack
-        print left
-        pass
-
-    def manage_cycles(self, current, PMI, stack, stack_pmi, left):
-        print 'Cycles:'
-        print current
-        print stack
-        print left
-        pass
-

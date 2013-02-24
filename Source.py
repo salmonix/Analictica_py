@@ -1,7 +1,11 @@
 import os
 import re
 import copy
+
 from aConfig import Config
+
+from NLP.Tokenizers import Tokenizer, Sentencer
+from NLP.Filters import Stopword
 
 class Corpus(object):
     """Returns a generator which returns a data entry as title - data string.
@@ -11,47 +15,43 @@ class Corpus(object):
         the following dictionary stores the rest of the connection parameters, which is 
         path in the case of a file."""
 
-    connections = Config().sources
-    @classmethod
-    def list_connections(cls):
-        return Corpus.connections.keys()
-
     @staticmethod
     def _reader_factory(con_type, con_params):
         if con_type == "Txt": return Txt(con_params).read_in()
         if con_type == "ATU": return ATU(con_params).read_in()
         raise ValueError(con_type + ' is not recognized type')
 
-    def process(self, source):
-        """Processes a source and returns an Elements instance of the processed data. Source names are case insensitive."""
-        title = source.lower()
-        source = Corpus.connections[title]
-        path = source[1]['path']
+    def __init__(self, source):
+        self.title = source.lower()
+        self.source = Config().sources(source)
 
-        if os.path.isfile(path):
-            source_iterator = self._read_data(source[0], source[1])
-            for data in source_iterator:
-                for i in data:
+    # this can be a decorator ( but I doubt we'll need that )
+    def tokenize_source(self, sentencer=None,  # that is equal to none.
+                              tokenizer=None,
+                              language=None):
+        """Returns an iterator of ( 'title', tokens[] ). Optional parameters are:
+        sentencer(str) -> list or str. default: x -> x
+        tokenizer(str) -> list of str. default: str.split()
+        language(str)  -> additional parameter to the aboves. default: none. """
+
+        self.sentencer = Sentencer(sentencer, language)
+        self.tokenizer = Tokenizer(tokenizer, language)
+
+        for (title, text) in self.read_data():
+            for s in self.sentencer.process(data):
+                tokens = self.tokenizer.get_tokens(s)
+                yield title, tokens
+
+
+    def read_data(self):
+        """Returns an iterator of ( 'title', 'line' )"""
+
+        for spath in self.source.path:  # iterate the source paths ( can be multiple )
+            read_in = Corpus._reader_factory(self.source.sourcetype, source.path)  # it returns the proper read_in iterator for the source
+            for text in read_in:
+                for i in text:
                     yield title, i
 
-        elif os.path.isdir(path):
-            source = copy.copy(source)
-            for f in os.listdir(path):
-                print (f)
-                source[1]['path'] = os.path.join(path, f)
-                title = os.path.basename(f)
-                for data in self._read_data(source[0], source[1]):
-                    for i in data:
-                        yield title, i
-
-    def _read_data(self, con_type, con_params):
-        """Takes source_name and connection parameters, returns an iterator of ( source_name, data string )
-        It passes the wole dictionary entry of the tuple related to the sourcename(s)"""
-        # source_config contains the module that is called
-        # it returns a data string split into sentences
-        data_obj = Corpus._reader_factory(con_type, con_params)
-        for i in data_obj:  # we expect iterable returns. Each i is a string unit TODO: Test here !
-            yield [i]
 
 class Txt(object):
     """Load a txt file. The class requires 'path' parameter. """

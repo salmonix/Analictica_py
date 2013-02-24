@@ -25,9 +25,10 @@ def print_tokens(tokens):
         print('prob.: ' + str(t.probability) + ' entropy: ' + str(t.shannon) + "\n")
 
 
-elements = Elements(sentencer='punkt', language='english', tokenizer='PunktWord')
-for (title, text) in Corpus().process(source='test'):  # I feel it awkward
-    elements.process_datastring(title, text)
+
+elements = Elements()
+for (title, tlist) in Corpus(source='test').tokenize_source():
+    elements.add_tokenlist(title, tlist)
 
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 # test_for_text_tokens(elements)
@@ -38,3 +39,10 @@ table = Tables.Table(elements.tokens)
 
 table.build_table(method='PMI')
 print(table.write_formatted())
+
+
+from Engines import Yuret
+Yur = Yuret(Elements.tokens)  # initialize the engine with the primal dataset
+
+[ Yur.process_sentence(d) for d in data ]  # process the dataset
+

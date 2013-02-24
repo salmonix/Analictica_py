@@ -2,32 +2,24 @@ import re
 from math import log
 from copy import copy
 
-from NLP.Tokenizers import Tokenizer, Sentencer
-from NLP.Filters import Stopword
+
 
 from Modules.Abacus import entropy, probability
 
 
 # CAVEAT: the sentence head token is hard coded as id 0
 class Elements(object):
-    """Object containing obj.tokens and obj.texts with some additional convenience methods on the top."""
+    """Object containing obj.tokens and obj.texts."""
 
-    def __init__(self, sentencer, tokenizer, language):
-        self.sentencer = Sentencer(sentencer, language)
-        self.tokenizer = Tokenizer(tokenizer, language)
-
+    def __init__(self):
         self.tokens = Tokens()
         self.sentences = Sentences()
 
-    def process_datastring(self, title, data):
-        sentences = self.sentencer.process(data)
-        for s in sentences:
-            tokens = self.tokenizer.get_tokens(s)
-            self.add_data(title, tokens)
-
-    def add_data(self, source, tokenlist):
+# XXX perhaps not the best name
+    def add_tokenlist(self, title, tokenlist):
         """Convenience method to process a sentence into the text and token containers."""
-        self.sentences.add_text(source)
+
+        self.sentences.add_text(title)
         tokenlist.insert(0, '_head_')
         idx = self.tokens.add_token(tokenlist)
 
@@ -45,20 +37,18 @@ class Tokens(Elements):
         self.no_of_tokens = 1
         self.tokens = []  # token id ->{token_obj}
         self.names = {}  # name -> id TODO: lookup using trie
-        self.S = 1.0  # helps to fix most calculations as
+        self.S = 1.0  # helps to fix most calculations as floats
 
     def add_token(self, data):
-        """ Takes a string or list of strings ( tokens ) and stores in the tokenlist. Returns the index number(s) for the token. """
+        """ Takes a list of tokens and stores them the tokenlist instance. Returns the index number(s) for the token. """
 
-        if isinstance(data, str):  # add a string - obsolete
-            return self._add_token(data)
-        elif isinstance(data, list):  # add a list of strings
-            idxs = []
-            for i in data:
-                idxs.append(self._add_token(i))
-            return idxs
+        idxs = []
+        for i in data:
+            idxs.append(self._add_token(str(i)))
+        return idxs
 
     def _add_token(self, name, parent={}, children={}):
+        self.S += 1
         if  name in self.names :  # token exists
             token = self.names[ name ]
             self.freq_add(token)
@@ -67,7 +57,6 @@ class Tokens(Elements):
 
         # new token hash is made here
         else:
-            self.S += 1
             self.tokens.append(Token(name, self.idx, self))
             self.names[name] = self.idx
             # print ('no exists : ' + name)
@@ -138,8 +127,6 @@ class Token(object):
         else:
             return 0.0
 
-    # well, it is not optimized because of a number of zero lookup
-    # but well fits the design.
     def PMI(self, B):
         """Pointwise Mutual Information PMI(A|B) = p(A&B) / p(A)xp(B)"""
         # print ('CO_OCC:' + str(self.co_occurrence))
