@@ -17,8 +17,9 @@ class Corpus(object):
 
     @staticmethod
     def _reader_factory(con_type, con_params):
+        # should be more clever
         if con_type == "Txt": return Txt(con_params)
-        if con_type == "ATU": return ATU(con_params)
+        if con_type == "ATU_Motifchain": return ATU_Motifchain(con_params)
         raise ValueError(con_type + ' is not recognized type')
 
     def __init__(self, source):
@@ -65,14 +66,18 @@ class Txt(object):
 
         yield title, [ file_string ]
 
-# clear it up, check regexp etc. -> this should be a tokenizer!
-class ATU(Txt):
-    """Reads an ATU, which is a type of text file. Requires 'path' parameter."""
-    # closures_cfs = re.compile('\[.*?\]|cf\..*?\.')
+# XXX perhaps it should be vice versa - these would be the decorators of the Txt object
+class ATU_Motifchain(Txt):
+    """Reads an ATU, which is a type of tabbed text file, a head and tail type..."""
+
     def __init__(self, source):
-        super(ATU, self).__init__(source)  # python3: super().__init__( source )
+        super(ATU_Motifchain, self).__init__(source)  # python3: super().__init__( source )
 
     def read_in(self):
-        txt_iterator = super(ATU, self).read_in()
-        # data = closures_cfs.sub('', data)
-        return txt_iterator
+        txt_iterator = super(ATU_Motifchain, self).read_in()
+        for title, text in txt_iterator:
+            lines = text[0].split('\n')
+            for l in lines:
+                row = l.split('\t')
+                yield row[0], ' '.join(row[1:])
+

@@ -50,7 +50,7 @@ class ConfigSource(object):
 class ConfigSources(object):
 
     _sources = {'test' : {'Txt' : { 'path':'/home/salmonix/memdrive/Analictica.test_text' }},
-                   'atu' : {'ATU': {'path': '/home/salmonix/DARANYI_MOTYO/ATU/ATU_files/' }},
+                   'ATU_Motifchain' : {'ATU_Motifchain': {'path': '/home/salmonix/ATU_MASTER/ATU_Motifchain.txt' }},
                   }
     _shared_state = {}
 

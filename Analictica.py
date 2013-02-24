@@ -8,7 +8,7 @@ from testHelpers import *
 Config = Config()
 
 
-elements = Elements(datasource=Corpus(source='test').tokenize_source())
+elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 
 # recall_text(elements)

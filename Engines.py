@@ -2,7 +2,7 @@ from Data.Elements import Tokens, Links
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.WARNING)
+logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 def get_engine(name, elements):
     if name == 'Yuret':
@@ -66,7 +66,7 @@ class Yuret(object):
                         logging.info("      ----> sum(stack) cmp l")
                         sum_stack = sum(Xlink[2] for Xlink in Xlinks)  # this is the stack PMI-> sum of link PMIs
                         logging.info("         SUM(Xlinks): %f    link value: %f" % (sum_stack, r - l))
-                        if link_value > sum_stack:  # stronger link: drop the others, keep this
+                        if link_value > sum_stack:
                             Xlinks = None
                         else:
                             logging.info('      ----> Link is BAD link : keeping all unchanged: ' + stringit(links))
@@ -89,15 +89,23 @@ class Yuret(object):
 
                     if cycle_pointer == r:  # check for cycle
                         logging.info ("    --> Cycle detected - cycle_pointer %d -> link( %d, %d )  -> decide" % (cycle_pointer, l, r))
-                        sum_stack = sum(cyc[2] for cyc in Cycles)
-                        logging.info("         SUM(Cycles): %f    link value: %f" % (sum_stack, link_value))
-                        if link_value < sum_stack:  # bad link
-                            logging.info('      ----> Link is BAD link : keeping stack + Cycles : %s + %s' % (stringit(stack), stringit(Cycles)))
-                            if Cycles:
-                                stack = stack + Cycles
-                        else:
-                            logging.info('      ----> link is kept, Cycles  %s dropped' % (stringit(Cycles)))
-                            links = stack + [(l, r, link_value)]
+                        # find the weakes of the cycle
+                        weakest = (0, 0, 100)  # PMI can't be 100...
+                        w_pos = 0
+                        c = 0
+                        for l in Cycles:
+                            if l[2] < weakest[2]:
+                                weakest = l
+                                w_pos = c
+                            c += 1
+                        logging.info('      ----> Cycle weakest %s , link PMI %f' % (stringit(weakest), link_value))
+                        if weakest[2] < link_value:  # we can eliminate this, because its PMI is smaller than our candidate
+                            del Cycles[c]
+                            logging.info('      ----> link is kept, Cycle weakest %s dropped' % (stringit(weakest)))
+                            links = stack + Cycles + [(l, r, link_value)]
+                        else:  # even the weakest is stronger than this, so drop link
+                            logging.info('       ----> link is not stronger than weakest, link is dropped.')
+                            links = stack + Cycles
                     else:  # no cycle, no Xlinks
                         links = stack + [(l, r, link_value)]
                         logging.info ("\nEOL: Links %s + (%d,%d). -> %s " % (stringit(stack), l, r, stringit(links)))
