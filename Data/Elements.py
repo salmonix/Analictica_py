@@ -75,9 +75,17 @@ class Tokens(Elements):
         return self.tokens[token].freq
 
 class Links(Tokens):
-    """Links are Tokens, only differ that their name is a tuple and their attribute is the link_PMI."""
+    """Links are Tokens, only differ that their name is a tuple and we also have to store the source Tokens instance."""
 
-    # XXX we may have a smart relation handler later, but now I just want to make it work
+    def __init__(self, source):
+        self.active = []
+        self.idx = 0
+        self.no_of_tokens = 1
+        self.tokens = []  # token id ->{token_obj}
+        self.names = {}  # name -> id TODO: lookup using trie
+        self.S = 1.0  # helps to fix most calculations as floats
+        self.source = source
+
     def add_tokenlist(self, data):
         """ Takes a list of links and stores them the tokenlist instance. Returns the index number(s) for the token. """
 
@@ -87,6 +95,11 @@ class Links(Tokens):
             self.tokens[idx].link_PMI(i[2])
 
         return idxs
+
+    def links_PMI(self, link):
+        return self.source[ link[0]].PMI(self.source[ link[1] ])
+
+
 
 class Token(object):
     """Token object. The co_occurrence is a matter of definition."""
@@ -146,17 +159,7 @@ class Token(object):
             return 0.0
 
 class Link(Token):
-    """Links are Tokens, only differ that their name is a tuple and their attribute is the link_PMI."""
-
-    def recall_linkname(self, link):
-        """Returns a tuple of the token names the link is built of."""
-        pass
-
-    def link_PMI(self, PMI=None):
-        if PMI:
-            self.attribute[0] = PMI
-        else:
-            return self.attribute[0]
+    """Links are Tokens, only differ that their name is a tuple."""
 
 
 class Sentences(object):

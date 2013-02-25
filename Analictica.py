@@ -16,18 +16,18 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 # print_PMI(elements.tokens)
 
 table = Tables.Table(elements.tokens)
-print(table.build_table(method='co_occurrence'))
+# print(table.build_table(method='co_occurrence'))
 
-print (table.build_table(method='PMI'))
+# print (table.build_table(method='PMI'))
 #
-# table.build_table(method='PMI')
-print(table.write_formatted())
+table.build_table(method='PMI')
+table.write_formatted(file='PMI.csv', format='csv')
 
 
-from Engines import Yuret
-Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
-
-[ Yur.process_sentence(s) for s in elements.sentences.get_sentences() ]  # process the dataset. Yes, we can make it iter as we did with Elements
+# from Engines import Yuret
+# Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
+#
+# [ Yur.process_sentence(s) for s in elements.sentences.get_sentences() ]  # process the dataset. Yes, we can make it iter as we did with Elements
 
 
 

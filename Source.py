@@ -81,7 +81,9 @@ class ATU_Motifchain(Txt):
 
     def read_in(self):
         with open(self.path, 'r') as f:
-            row = f.readline().split('\t')
-            row[-1] = row[-1].strip('\n')
-            yield row[0], [ row[1:] ]
+
+            for row in f.readlines():
+                row = row.split('\t')
+                row[-1] = row[-1].strip('\n')
+                yield row[0], [ row[1:] ]
 

@@ -15,7 +15,6 @@ class Yuret(object):
     def __init__(self, tokens):
         self.link_candidates = []
         self.links = Links()  # we collect the links into an elements list. Always the lower tokenid is used
-        # we should address the meta class to generate us the object
         self.tokens = tokens
 
     def process_sentence(self, data):  # takes a sentence list
@@ -49,8 +48,7 @@ class Yuret(object):
 
                 for link in links:  # iterate on the links stack
 
-                    if  link[0] < l and link[1] <= l:  # out of our present investigation window
-                        # logging.info('# Found out of range link' + str(link))
+                    if  link[0] < l and link[1] <= l:
                         logging.info('    append good link %s' % (stringit(link)))
                         stack.append(link)  # good links
                         continue
@@ -100,7 +98,7 @@ class Yuret(object):
                             c += 1
                         logging.info('      ----> Cycle weakest %s , link PMI %f' % (stringit(weakest), link_value))
                         if weakest[2] < link_value:  # we can eliminate this, because its PMI is smaller than our candidate
-                            del Cycles[c]
+                            del Cycles[c - 1]  # we increment always finally
                             logging.info('      ----> link is kept, Cycle weakest %s dropped' % (stringit(weakest)))
                             links = stack + Cycles + [(l, r, link_value)]
                         else:  # even the weakest is stronger than this, so drop link
@@ -111,16 +109,16 @@ class Yuret(object):
                         logging.info ("\nEOL: Links %s + (%d,%d). -> %s " % (stringit(stack), l, r, stringit(links)))
 
         logging.info ("\n### Finally LINKS:" + stringit(links))
-        self.store_links(links)
 
+        # we have to tokenize
+        final = []
+        for l in links:
+            final.append(data[ l[0] ], data[l[1]])
 
-    def store_links(self, links=[]):
-        try:
-            self.links.add_tokenlist(links)
-        except:
-            return
+        self.tokens.add_data(final)
+        return final
 
-
+        # XXX final question: implement PMI for the Links token
 
 
 
