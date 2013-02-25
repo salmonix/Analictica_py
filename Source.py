@@ -39,9 +39,13 @@ class Corpus(object):
         self.tokenizer = Tokenizer(tokenizer, language)
 
         for (title, text) in self.read_data():
-            for s in self.sentencer.process(text):
-                tokens = self.tokenizer.get_tokens(s)
-                yield title, tokens
+            if hasattr(self.source, 'no_nlp'):  # XXX we stop here for some reason
+                print(text)
+                yield title, text
+            else:
+                for s in self.sentencer.process(text):
+                    tokens = self.tokenizer.get_tokens(s)
+                    yield title, tokens
 
 
     def read_data(self):
@@ -70,14 +74,14 @@ class Txt(object):
 class ATU_Motifchain(Txt):
     """Reads an ATU, which is a type of tabbed text file, a head and tail type..."""
 
+    head_n_tail = re.compile(r'.*\t.*')
+
     def __init__(self, source):
         super(ATU_Motifchain, self).__init__(source)  # python3: super().__init__( source )
 
     def read_in(self):
-        txt_iterator = super(ATU_Motifchain, self).read_in()
-        for title, text in txt_iterator:
-            lines = text[0].split('\n')
-            for l in lines:
-                row = l.split('\t')
-                yield row[0], ' '.join(row[1:])
+        with open(self.path, 'r') as f:
+            row = f.readline().split('\t')
+            row[-1] = row[-1].strip('\n')
+            yield row[0], [ row[1:] ]
 
