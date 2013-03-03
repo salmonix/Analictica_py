@@ -62,16 +62,15 @@ class Table(object):
         return table
 
 # ## TODO
-# ehh, a = numpy.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
-# numpy.savetxt("foo.csv", a, delimiter=",")
 
     def write_formatted(self, **kwargs):  # takes also : target object
         # if there is not table -> formatting must fail instead of creating an empty table
         # it will not work with ARRAYs  - we must write it immediately out to the passed object
 
         writer = WriteTable(**kwargs)
-        header = [ t.name for t in self.tokens.tokens]
+        header = [ t.real_name for t in self.tokens.tokens]
         writer.write(header)
+
         for i in range(1, len(header)):
             row = []
             row.append(header[i])
@@ -90,6 +89,7 @@ class WriteTable(object):
         if target == 'stdout':
             self.target = sys.stdout
         elif file:
+
             try:
                 self.target = open(file, 'w')
             except:
@@ -106,7 +106,6 @@ class WriteTable(object):
             self.formatter = lambda row : row  # TODO implement a pretty-printer
         else:
             raise ValueError('Wrong format is passed: ' + format)
-
 
     def write(self, row=[]):
         line = self.formatter(row)

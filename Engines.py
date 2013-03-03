@@ -113,7 +113,9 @@ class Yuret(object):
         # we have to tokenize
         final = []
         for l in links:
-            final.append(data[ l[0] ], data[l[1]])
+            left_token = tokens(data[ l[0] ])
+            right_token = tokens(data[ l[1] ])
+            final.append(left_token, right_token)
 
         self.tokens.add_data(final)
         return final

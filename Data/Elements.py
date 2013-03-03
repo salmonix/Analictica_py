@@ -42,7 +42,7 @@ class Tokens(Elements):
 
         idxs = []
         for i in data:
-            idxs.append(self.add_token(str(i)))
+            idxs.append(self.add_token(i))
         return idxs
 
     def add_token(self, name, parent={}, children={}):
@@ -116,6 +116,10 @@ class Token(object):
         self.freq += num
 
     @property
+    def real_name(self):
+        self.name
+
+    @property
     def Space(self):
         """The probability space."""
         return self.S.S
@@ -159,7 +163,24 @@ class Token(object):
             return 0.0
 
 class Link(Token):
-    """Links are Tokens, only differ that their name is a tuple."""
+    """Links are Tokens, only differ that their name is a tuple and have some link specific attribute."""
+
+    @property
+    def link_PMI(self):
+        """Returns the PMI of the link elements."""
+        self.name[0].PMI(self.name[1])
+
+    @property
+    def real_name(self):
+        """Returns the real names of elements that the link are composed of as a stringified tuple."""
+        names = ()
+        for c in range(0, 1):
+            if hasattr(self.name[c], 'real_name'):
+                 names[c] = self.name[c].real_name
+            elif hasattr(self.name[c], 'name'):
+                 names[c] = self.name[c].name
+
+        return str(names)
 
 
 class Sentences(object):
