@@ -82,7 +82,7 @@ class Links(Tokens):
         self.idx = 0
         self.no_of_tokens = 1
         self.tokens = []  # token id ->{token_obj}
-        self.names = {}  # name -> id TODO: lookup using trie
+        self.values = {}  # name -> id TODO: lookup using trie
         self.S = 1.0  # helps to fix most calculations as floats
         self.source = source
 
@@ -103,9 +103,9 @@ class Links(Tokens):
 
 class Token(object):
     """Token object. The co_occurrence is a matter of definition."""
-    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute')
+    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'value')
     def __init__(self, name, idx, parent, freq=1.0):
-        self.name = name
+        self.value = name
         self.idx = idx
         self.freq = freq
         self.co_occurrence = {}
@@ -116,8 +116,8 @@ class Token(object):
         self.freq += num
 
     @property
-    def real_name(self):
-        self.name
+    def name(self):
+        return self.value
 
     @property
     def Space(self):
@@ -168,18 +168,16 @@ class Link(Token):
     @property
     def link_PMI(self):
         """Returns the PMI of the link elements."""
-        self.name[0].PMI(self.name[1])
+        self.value[0].PMI(self.value[1])
 
     @property
-    def real_name(self):
+    def name(self):
         """Returns the real names of elements that the link are composed of as a stringified tuple."""
         names = ()
         for c in range(0, 1):
-            if hasattr(self.name[c], 'real_name'):
-                 names[c] = self.name[c].real_name
-            elif hasattr(self.name[c], 'name'):
-                 names[c] = self.name[c].name
+            names[c] = self.value[c].name
 
+        # print (names)
         return str(names)
 
 

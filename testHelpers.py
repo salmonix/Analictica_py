@@ -11,7 +11,10 @@ def recall_text(elements):
         for s in sentences:
             recalled_text_id.append(s)
             recalled_text.append(tokens.tokens[s].name)
+
+        print ('TEXT by ID')
         print (recalled_text_id)
+        print ('TEXT by values')
         print (recalled_text)
 
 def print_tokens(tokens):

@@ -14,7 +14,7 @@ class Yuret(object):
 
     def __init__(self, tokens):
         self.link_candidates = []
-        self.links = Links()  # we collect the links into an elements list. Always the lower tokenid is used
+        self.links = Links(tokens)  # we collect the links into an elements list. Always the lower tokenid is used
         self.tokens = tokens
 
     def process_sentence(self, data):  # takes a sentence list
