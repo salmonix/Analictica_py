@@ -1,8 +1,8 @@
 from aConfig import Config
 from Source import Corpus
 from Data.Elements import Elements
-from Data import Tables
-
+from Representations import Tables
+from Representations.Graph import make_graph_with_attribute
 import networkx as nx
 
 from testHelpers import *
@@ -10,24 +10,23 @@ from testHelpers import *
 Config = Config()
 
 
-# elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
-elements = Elements(datasource=Corpus(source='test').tokenize_source())
+elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
+# elements = Elements(datasource=Corpus(source='test').tokenize_source())
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 
 # raw_input('RECALL TEXT')
-# recall_text(elements)
+# recall_text(elements, by='name')
 # raw_input('TOKENS ELEMENTS')
 # print_tokens(elements.tokens)
 # raw_input('PMI')
 # print_PMI(elements.tokens)
 
-# table = Tables.Table(elements.tokens)
-# print(table.build_table(method='co_occurrence'))
+table = Tables.Table(elements.tokens)
+table.build_table(method='co_occurrence')
+table.write_formatted(file='Co-occ.csv', format='csv')
 
-# print (table.build_table(method='PMI'))
-#
-# table.build_table(method='PMI')
-# table.write_formatted(file='PMI.csv', format='csv')
+table.build_table(method='PMI')
+table.write_formatted(file='PMI.csv', format='csv')
 
 
 from Engines import Yuret
@@ -35,52 +34,13 @@ Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
 
 link_graph = nx.Graph()
 text_graph = nx.DiGraph()
-combined_graph = nx.Graph()
 
-# we must check for the existence of the given graph
+for s in elements.sentences.get_sentences_by_object():
 
-def make_graph(sequence, a_graph):
-    sequence = [text_graph.add_nodes(tokens[t].real_name) for t in sequence]
+   Yur.process_sentence(s)
+   link_graph = Yur.as_graph(link_graph)
 
-    prev = ''
-    prev_name = ''
-    for t in sequence:
-        token = tokens[t]
-        token_name = token.name
+   text_graph = make_graph_with_attribute(text_graph, s)
 
-        a_graph.add_node(token_name, pmi=token.pmi)
-
-        if prev:
-            a_graph.add_edge(prev_name, token_name)  # so, we need to add attributes to the link, that is increment the mutual co-occurrence
-            a_graph.edge[ prev_name ][ token_name ].weight += 1
-            prev = token
-            prev_name = token.name
-
-
-
-def graph_from_linksequence(sequence, a_graph):
-
-    prev = ''
-    prev_name = ''
-    for t in sequence:
-        token = tokens[t]
-        token_name = token.name
-
-        a_graph.add_node(token_name, pmi=token.link_PMI)
-
-        if prev:
-            a_graph.add_edge(prev_name, token_name)
-            a_graph.edge[ prev_name ][ token_name ].weight += 1
-            prev = token
-            prev_name = token.name
-
-
-
-for s in elements.sentences.get_sentences():
-    linked_sentence = Yur.process_sentence(s)
-    make_graph(s, text_graph)
-    graph_from_linksequence(linked_sentence, link_graph)
-
-
-text_graph.write_gml('../Text_graph.gml')
-graph_from_linksequence.write_gml('../Links_graph.gml')
+nx.write_gexf(link_graph, '../Link_graph.gexf', encoding='utf-8', prettyprint='True')
+nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')

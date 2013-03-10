@@ -2,40 +2,42 @@ from Data.Elements import Tokens, Links
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
+logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.WARNING)
 
 def get_engine(name, elements):
     if name == 'Yuret':
         pass
     raise ValueError(name + 'is not implemented')
-
+import networkx as nx
 
 class Yuret(object):
+    """The engine process a given sequence according to the algorithm they represent. Due to the fact that
+    the data might be stored in special formats the engine also offers transformation into eg. graph."""
 
     def __init__(self, tokens):
         self.link_candidates = []
-        self.links = Links(tokens)  # we collect the links into an elements list. Always the lower tokenid is used
-        self.tokens = tokens
+        self.links = Links(tokens)  # we collect the links into an elements list.
+        self.sequence = None  # we store the current processed sentence
 
     def process_sentence(self, data):  # takes a sentence list
+        """Takes a list of tokens ( sequence ), creates a link-set and stores as obj.sequence.
+        links are: ( l, r, link_value ), where: l - r are positional values in data list, link_value is the calculated pmi."""
 
         end = len(data)
-        # links are: ( l, r, link_value ), where: l - r are positional values in data list, link_value is the calculated pmi.
         links = []
         cycle_pointer = 0
-        tokens = self.tokens.tokens
         stringit = lambda x : str(x).strip('[]')
 
         logging.info('Sentence received : ' + stringit(data))
 
-        links.append((0, 1))  # initial state for the links stack
+        for r in range(1, end):  # take the right element of the link
 
-        for r in range(2, end):  # take the right element of the link
-            right = tokens[ data[r]]
+            right = data[r]
             link_value = -1
-            for l in range(r - 1, 0, -1):
 
-                link_value = right.PMI(tokens[ data[r]])
+            for l in range(r - 1, -1, -1):
+                logging.info("L is %d, R is %d" % (l, r))
+                link_value = right.PMI(data[l])
                 if link_value <= 0:
                     logging.info ('link_value is zero or negative: %f' % (link_value))
                     continue
@@ -65,7 +67,7 @@ class Yuret(object):
                         sum_stack = sum(Xlink[2] for Xlink in Xlinks)  # this is the stack PMI-> sum of link PMIs
                         logging.info("         SUM(Xlinks): %f    link value: %f" % (sum_stack, r - l))
                         if link_value > sum_stack:
-                            Xlinks = None
+                            Xlinks = []
                         else:
                             logging.info('      ----> Link is BAD link : keeping all unchanged: ' + stringit(links))
                             break  # this is a bad link
@@ -91,38 +93,52 @@ class Yuret(object):
                         weakest = (0, 0, 100)  # PMI can't be 100...
                         w_pos = 0
                         c = 0
-                        for l in Cycles:
-                            if l[2] < weakest[2]:
-                                weakest = l
+                        for cLink in Cycles:
+                            if cLink[2] < weakest[2]:
+                                weakest = cLink
                                 w_pos = c
                             c += 1
                         logging.info('      ----> Cycle weakest %s , link PMI %f' % (stringit(weakest), link_value))
                         if weakest[2] < link_value:  # we can eliminate this, because its PMI is smaller than our candidate
                             del Cycles[c - 1]  # we increment always finally
                             logging.info('      ----> link is kept, Cycle weakest %s dropped' % (stringit(weakest)))
-                            links = stack + Cycles + [(l, r, link_value)]
+                            logging.info ("\nEOL: Links %s + %s + (%d,%d)" % (stringit(stack), stringit(Cycles), l, r,))
+                            links = stack + Cycles
+                            links.append((l, r, link_value))
                         else:  # even the weakest is stronger than this, so drop link
                             logging.info('       ----> link is not stronger than weakest, link is dropped.')
+                            logging.info ("\nEOL: Links %s + %s" % (stringit(stack), stringit(Cycles)))
                             links = stack + Cycles
                     else:  # no cycle, no Xlinks
-                        links = stack + [(l, r, link_value)]
-                        logging.info ("\nEOL: Links %s + (%d,%d). -> %s " % (stringit(stack), l, r, stringit(links)))
+                        logging.info ("\nEOL: Links %s + (%d,%d)" % (stringit(stack), l, r,))
+                        stack.append((l, r, link_value))
+                        links = stack
+
 
         logging.info ("\n### Finally LINKS:" + stringit(links))
 
-        # we have to tokenize
+        # we return a list of links object
         final = []
         for l in links:
-            left_token = tokens(data[ l[0] ])
-            right_token = tokens(data[ l[1] ])
-            final.append(left_token, right_token)
 
-        self.tokens.add_data(final)
-        return final
+            link_object = self.links.add_token((data[ l[0] ], data[ l[1] ]))
+            final.append(link_object)
 
-        # XXX final question: implement PMI for the Links token
+        self.sequence = final
 
+    def as_graph(self, graph=nx.Graph()):
+        """Creates a graph of the last processed sequence. Returns a networkX graph."""
+        # at this level it works but what if we have nested structures?
+        # What is a graph if not a set of links? Why do not we put all into a graph?
+        for link in self.sequence:
+            logging.info(link)
+            (l, r) = link.value
+            (ln, rn) = link.name
+            logging.info ("Node: %s %s " % (l.name, str(l.shannon)))
+            graph.add_node(l.name, shannon=l.shannon)
+            logging.info ("Node: %s %s " % (r.name, str(r.shannon)))
+            graph.add_node(r.name, shannon=r.shannon)
+            logging.info ("Edge: %s %s %s " % (l.name, r.name, str(link.PMI)))
+            graph.add_edge(l.name, r.name, pmi=link.PMI)
 
-
-
-
+        return graph

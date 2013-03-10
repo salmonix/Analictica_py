@@ -8,7 +8,7 @@ class Elements(object):
 
     def __init__(self, datasource=None):
         self.tokens = Tokens()
-        self.sentences = Sentences()
+        self.sentences = Sentences(self.tokens)
         if datasource:
             for (title, tlist) in datasource:
                 self.add_sentence_of_tokens(title, tlist)
@@ -18,13 +18,13 @@ class Elements(object):
 
         self.sentences.add_text(title)
         tokenlist.insert(0, '_head_')
-        idx = self.tokens.add_tokenlist(tokenlist)
+        tokens = self.tokens.add_tokenlist(tokenlist)
 
-        self.sentences.add_token_ids(idx)
+        self.sentences.add_token_ids([ t.idx for t in tokens])
 
 
 class Tokens(Elements):
-    """Container for the tokens, the nodes. Token container is not optimal for deletion."""
+    """Container for the tokens, the nodes. Token container is not optimal for deletion because it maintains an array."""
 
     def __init__(self):
         """The initial token is _head , which is the head of a sequence."""
@@ -38,41 +38,43 @@ class Tokens(Elements):
 
     # add_tokenlist
     def add_tokenlist(self, data):
-        """ Takes a list of tokens and stores them the tokenlist instance. Returns the index number(s) for the token. """
+        """ Takes a list of tokens and stores them the tokenlist instance. Returns the list of tokens. """
 
-        idxs = []
+        tks = []
         for i in data:
-            idxs.append(self.add_token(i))
-        return idxs
+            tks.append(self.add_token(i))
+        return tks
 
     def add_token(self, name, parent={}, children={}):
-        self.S += 1
-        if  name in self.names :  # token exists
-            token = self.names[ name ]
-            self.freq_add(token)
-            # print ('exists: ' + name)
-            return self.tokens[ token ].idx
 
-        # new token hash is made here
-        else:
+        self.S += 1
+
+        if  name in self.names :  # token exists
+            idx = self.names[ name ]
+            self.freq_add(idx)
+            # print ('exists: ' + name)
+            return self.tokens[idx]
+
+        else:  # new token hash is made here
             self.tokens.append(Token(name, self.idx, self))
             self.names[name] = self.idx
-            # print ('no exists : ' + name)
+            # print ('not exists : ' + name)
             idx = self.idx
             self.idx += 1
-            return idx
+            return self.tokens[-1]
 
-    def get_token(self, token):
+    def get_token(self, idx):
         """Gets a token_id  ( index ) -> returns a token """
 
         return self.idx(token_id)
 
-    def freq_add(self, token, num=1):
-        if type(token) is str:
-            token = self.names[token]  # get the id
+    def freq_add(self, idx, num=1):
+        if type(idx) is str:
+            token = self.names[idx]  # get the id
 
-        self.tokens[token].freq_add(num)
-        return self.tokens[token].freq
+        self.tokens[idx].freq_add(num)
+        return self.tokens[idx].freq
+
 
 class Links(Tokens):
     """Links are Tokens, only differ that their name is a tuple and we also have to store the source Tokens instance."""
@@ -82,7 +84,7 @@ class Links(Tokens):
         self.idx = 0
         self.no_of_tokens = 1
         self.tokens = []  # token id ->{token_obj}
-        self.values = {}  # name -> id TODO: lookup using trie
+        self.names = {}  # name -> id TODO: lookup using trie
         self.S = 1.0  # helps to fix most calculations as floats
         self.source = source
 
@@ -96,9 +98,23 @@ class Links(Tokens):
 
         return idxs
 
-    def links_PMI(self, link):
-        return self.source[ link[0]].PMI(self.source[ link[1] ])
+    def add_token(self, name, parent={}, children={}):
 
+        self.S += 1
+
+        if  name in self.names :  # token exists
+            idx = self.names[ name ]
+            self.freq_add(idx)
+            # print ('exists: ' + name)
+            return self.tokens[idx]
+
+        else:  # new token hash is made here
+            self.tokens.append(Link(name, self.idx, self))
+            self.names[name] = self.idx
+            # print ('not exists : ' + name)
+            idx = self.idx
+            self.idx += 1
+            return self.tokens[-1]
 
 
 class Token(object):
@@ -162,32 +178,33 @@ class Token(object):
         else:
             return 0.0
 
+    def PMI_with(self, B):
+        return self.PMI(B)
+
 class Link(Token):
     """Links are Tokens, only differ that their name is a tuple and have some link specific attribute."""
 
     @property
-    def link_PMI(self):
+    def PMI(self):
         """Returns the PMI of the link elements."""
-        self.value[0].PMI(self.value[1])
+        (l, r) = self.value
+        # print ('PMI:: ' + str(l.PMI(r)))
+        return l.PMI(r)
 
     @property
     def name(self):
         """Returns the real names of elements that the link are composed of as a stringified tuple."""
-        names = ()
-        for c in range(0, 1):
-            names[c] = self.value[c].name
-
-        # print (names)
-        return str(names)
+        return (self.value[0].name, self.value[1].name)
 
 
 class Sentences(object):
     """Text container: stores the text transformed into sequences of token index numbers."""
 
     # TODO: in case of lots of texts it should be optimized
-    def __init__(self):
+    def __init__(self, tokens):
         self.text = {}
         self.active = ''
+        self.tokens = tokens
 
     def add_text(self, source):
         """Start a new text unit."""
@@ -210,17 +227,33 @@ class Sentences(object):
             for t in title:  # this is each sentence list
                 yield (t, self.text[t])
 
-    def get_sentences(self):
+# these are copy-paste iterators but a. faster, b. I do not know the use cases
+    def get_sentences_by_id(self):
+        """Returns a list of token id's the sentence is built from."""
         for i in self.text.values():
             for s in i:
                 yield s
+
+    def get_sentences_by_object(self):
+            """Returns a list of token id's the sentence is built from."""
+            tokens = self.tokens.tokens
+            for i in self.text.values():
+                for s in i:
+                    yield [ tokens[id] for id in s ]
+
+    def get_sentences_by_name(self):
+                """Returns a list of token id's the sentence is built from."""
+                tokens = self.tokens.tokens
+                for i in self.text.values():
+                    for s in i:
+                        yield [ tokens[id].name for id in s ]
 
     def add_co_occurrences(self, tokens):
         """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
         Possibly other occurrences can be calculated here, like syntagmatic co-occurrences."""
 
         # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
-        sentences = self.get_sentences()
+        sentences = self.get_sentences_by_id()
         tokens = tokens.tokens
         for sen in sentences:
          #   print (sen)

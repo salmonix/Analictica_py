@@ -1,20 +1,23 @@
 
 
-def recall_text(elements):
+def recall_text(elements, by='id'):
     texts = elements.sentences
     tokens = elements.tokens
-    text_iter = texts.get_sentences()
+
+    text_iter = None
+    if by == 'id':
+        text_iter = texts.get_sentences_by_id()
+    elif by == 'object':
+        text_iter = texts.get_sentences_by_object()
+    elif by == 'name':
+        text_iter = texts.get_sentences_by_name()
 
     for sentences in text_iter:
-        recalled_text_id = []
         recalled_text = []
         for s in sentences:
-            recalled_text_id.append(s)
-            recalled_text.append(tokens.tokens[s].name)
+            recalled_text.append(s)
 
-        print ('TEXT by ID')
-        print (recalled_text_id)
-        print ('TEXT by values')
+        print ('TEXT by ' + by)
         print (recalled_text)
 
 def print_tokens(tokens):
