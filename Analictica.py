@@ -29,18 +29,18 @@ table.build_table(method='PMI')
 table.write_formatted(file='PMI.csv', format='csv')
 
 
-from Engines import Yuret
-Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
-
-link_graph = nx.Graph()
-text_graph = nx.DiGraph()
-
-for s in elements.sentences.get_sentences_by_object():
-
-   Yur.process_sentence(s)
-   link_graph = Yur.as_graph(link_graph)
-
-   text_graph = make_graph_with_attribute(text_graph, s)
-
-nx.write_gexf(link_graph, '../Link_graph.gexf', encoding='utf-8', prettyprint='True')
-nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')
+# from Engines import Yuret
+# Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
+#
+# link_graph = nx.Graph()
+# text_graph = nx.DiGraph()
+#
+# for s in elements.sentences.get_sentences_by_object():
+#
+#   Yur.process_sentence(s)
+#   link_graph = Yur.as_graph(link_graph)
+#
+#   text_graph = make_graph_with_attribute(text_graph, s)
+#
+# nx.write_gexf(link_graph, '../Link_graph.gexf', encoding='utf-8', prettyprint='True')
+# nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')
