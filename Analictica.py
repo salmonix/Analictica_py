@@ -17,16 +17,16 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 # raw_input('RECALL TEXT')
 # recall_text(elements, by='name')
 # raw_input('TOKENS ELEMENTS')
-# print_tokens(elements.tokens)
+print_tokens(elements.tokens)
 # raw_input('PMI')
 # print_PMI(elements.tokens)
 
 table = Tables.Table(elements.tokens)
-table.build_table(method='co_occurrence')
-table.write_formatted(file='Co-occ.csv', format='csv')
+table.build_table(method='IC')
+table.write_formatted(file='IC.csv', format='csv')
 
-table.build_table(method='PMI')
-table.write_formatted(file='PMI.csv', format='csv')
+# table.build_table(method='PMI')
+# table.write_formatted(file='PMI.csv', format='csv')
 
 
 # from Engines import Yuret

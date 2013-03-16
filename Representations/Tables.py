@@ -16,7 +16,7 @@ class Table(object):
         and the attribute co_occurrence is used assuming that it contains the relevant data - eg. co_occurrence with other
         tokens, in a dictionary. So, it is used instead of iterating over token x token times and letting each token
         run this check internally."""
-        dim = self.tokens.idx - 1  # space starts from 1, lists from 0
+        dim = self.tokens.idx  # space starts from 1, lists from 0
         table = zeros((dim, dim), dtype=float)  # the given tablespace is always overwritten
 
         for xToken in self.tokens.tokens:
@@ -47,21 +47,22 @@ class Table(object):
                     raise ValueError('Unable to get partial function from method ' + str(method))
 
                 # print ('Indexes: ' + str(x) + ' : ' + str(xToken.co_occurrence))
+
+                for yTokenId in xToken.co_occurrence.keys():
+                    y = self.tokens.tokens[yTokenId].idx
+                    table[x][y] = fun(self.tokens.tokens[yTokenId])
+
+            else:  # attribute
                 try:
                     for yTokenId in xToken.co_occurrence.keys():
                         y = self.tokens.tokens[yTokenId].idx
-                        table[x][y] = fun(self.tokens.tokens[yTokenId])
+                        table[x][y] = yMethod
                 except:
-                    assert'Exception'
-                    next
-
-            else:
-                raise ValueError('Parameter method returns neither iterable nor function.')
+                    raise ValueError('Parameter method returns neither iterable nor function nor real attribute.' + str(yMethod))
 
         self.table = table
         return table
 
-# ## TODO
 
     def write_formatted(self, **kwargs):  # takes also : target object
         # if there is not table -> formatting must fail instead of creating an empty table

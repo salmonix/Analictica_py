@@ -158,6 +158,23 @@ class Token(object):
             return 1.0
 
     @property
+    def IC(self):
+        """Information content for the token: -log2( p(A) ) 
+        If frequency is not set it returns 1.0."""
+        if self.freq != 0:
+            try:
+                # print ('FREQUENCY: ' + str(self.freq) + ' SPACE: ' + str(self.Space))
+                p = self.freq / self.Space
+                # print ('Probability: ' + str(p))
+                # print ('Shannon: ' + str(-1 * p * log(p, 2)))
+                return -1 * log(p, 2)
+            except:
+                raise ValueError('calculation went wrong')
+        else:
+            return 1.0
+
+
+    @property
     def probability(self):
         """Standard probability: freq/Space"""
 
