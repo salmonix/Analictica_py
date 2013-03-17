@@ -36,8 +36,7 @@ link_graph = nx.Graph()
 text_graph = nx.DiGraph()
 
 counter = 0
-for s in elements.sentences.get_sentences_by_object():
-    counter += 1
+for title, s in elements.sentences.get_sentences_by_object():
     if len(s) < 2:
         continue
 
@@ -45,7 +44,7 @@ for s in elements.sentences.get_sentences_by_object():
     link_graph = Yur.as_graph(link_graph)
 
     text_graph = make_graph_with_attribute(text_graph, s)
-    nx.write_gexf(link_graph, '../ATU_4xx/' + str(counter) + '_link_graph.gexf', encoding='utf-8', prettyprint='True')
+    nx.write_gexf(link_graph, '../ATU_4xx/' + title + '_link_graph.gexf', encoding='utf-8', prettyprint='True')
 
 
 nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')

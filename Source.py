@@ -40,7 +40,7 @@ class Corpus(object):
 
         for (title, text) in self.read_data():
             if hasattr(self.source, 'no_nlp'):  # XXX we stop here for some reason
-                print(text)
+                # print(text)
                 yield title, text
             else:
                 for s in self.sentencer.process(text):

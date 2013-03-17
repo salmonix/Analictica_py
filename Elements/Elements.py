@@ -59,39 +59,42 @@ class Sentences(object):
 # these are copy-paste iterators but a. faster, b. I do not know the use cases
     def get_sentences_by_id(self):
         """Returns a list of token id's the sentence is built from."""
-        for i in self.text.values():
+        for title, i in self.text.iteritems():
             for s in i:
-                yield s
+                yield title, s
 
     def get_sentences_by_object(self):
             """Returns a list of token id's the sentence is built from."""
             tokens = self.tokens.tokens
-            for i in self.text.values():
+            for title, i in self.text.iteritems():
                 for s in i:
-                    yield [ tokens[id] for id in s ]
+                    yield title, [ tokens[id] for id in s ]
 
     def get_sentences_by_name(self):
                 """Returns a list of token id's the sentence is built from."""
                 tokens = self.tokens.tokens
-                for i in self.text.values():
+                for title, i in self.text.iteritems():
                     for s in i:
-                        yield [ tokens[id].name for id in s ]
+                        yield title, [ tokens[id].name for id in s ]
 
     def add_co_occurrences(self, tokens):
         """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
         Possibly other occurrences can be calculated here, like syntagmatic co-occurrences."""
 
-        # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
-        sentences = self.get_sentences_by_id()
         tokens = tokens.tokens
-        for sen in sentences:
-         #   print (sen)
-            for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
-                token = tokens[ sen[c] ]
-                for i in range(1, len(sen)):  # this is the all with all loop
-                    if c != i:
-                        if sen[i] in token.co_occurrence:
-                            token.co_occurrence[ sen[i] ] += 1
-                        else:
-                            token.co_occurrence[ sen[i] ] = 1
-        #            print (" %d : %d " % (c, i))
+
+        # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
+        for sentences in self.text.values():  # get the list of sentences
+
+            for sen in sentences:  # iterate over the sentences
+             #   print (sen)
+                for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
+
+                    token = tokens[ sen[c] ]
+                    for i in range(1, len(sen)):  # this is the all with all loop
+                        if c != i:
+                            if sen[i] in token.co_occurrence:
+                                token.co_occurrence[ sen[i] ] += 1
+                            else:
+                                token.co_occurrence[ sen[i] ] = 1
+            #            print (" %d : %d " % (c, i))
