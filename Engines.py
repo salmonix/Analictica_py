@@ -1,4 +1,4 @@
-from Data.Elements import Tokens, Links
+from Elements import Atoms, Links
 import sys
 import logging
 
@@ -14,13 +14,13 @@ class Yuret(object):
     """The engine process a given sequence according to the algorithm they represent. Due to the fact that
     the data might be stored in special formats the engine also offers transformation into eg. graph."""
 
-    def __init__(self, tokens):
+    def __init__(self, atoms):
         self.link_candidates = []
-        self.links = Links(tokens)  # we collect the links into an elements list.
+        self.links = Links(atoms)  # we collect the links into an elements list.
         self.sequence = None  # we store the current processed sentence
 
     def process_sentence(self, data):  # takes a sentence list
-        """Takes a list of tokens ( sequence ), creates a link-set and stores as obj.sequence.
+        """Takes a list of atoms ( sequence ), creates a link-set and stores as obj.sequence.
         links are: ( l, r, link_value ), where: l - r are positional values in data list, link_value is the calculated pmi."""
 
         end = len(data)

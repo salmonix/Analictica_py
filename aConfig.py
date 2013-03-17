@@ -1,7 +1,4 @@
 # a link of Borg borg borg
-# __init__ is copy-paste !
-
-# a Borg
 
 import os.path
 
@@ -80,8 +77,3 @@ class Config(object):
 
         return self._sources
 
-
-# a = Config().sources('test')
-# print(a.__dict__)
-# print a.path
-# print a.sourcetype

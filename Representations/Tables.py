@@ -2,7 +2,10 @@ from numpy import zeros, dtype
 from functools import partial
 import sys
 
+from aConfig import Config
+
 class Table(object):
+
     def __init__(self, tokens):
         self.tokens = tokens
 
@@ -82,7 +85,8 @@ class Table(object):
         writer.close()
         return 1  # deal with the error cases
 
-# should go into an Exporters namespace
+
+# The writer for the table is not decided yet, but not generic.
 class WriteTable(object):
 
     def __init__(self, format='csv', target=None, file=None):

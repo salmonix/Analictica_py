@@ -1,0 +1,9 @@
+1. In the new namespace Tokens -> Atoms. However, the use of 'tokens' is still found everywhere.
+
+2. In aConfig.Sources we can read in homogenous sources as a corpus. We should read arbitrary sources.
+
+3. The current implementation is aiming at a structure Atoms - Links - Atoms graph. However, the structure is not really a graph at the moment,
+   because only links are stored. The place for improving it is Elements/Elements.py and Elements/Links.py  (That should be Edges.py ).
+   a. the possibilities the existing graph modules offer ( eg. walker? )
+   b. implementation of our own 
+   
