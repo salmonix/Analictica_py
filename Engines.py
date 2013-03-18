@@ -27,6 +27,7 @@ class Yuret(object):
         links = []
         cycle_pointer = 0
         stringit = lambda x : str(x).strip('[]')
+        self.sequence = data
 
         logging.info('Sentence received : ' + stringit(data))
 
@@ -126,18 +127,21 @@ class Yuret(object):
 
         self.sequence = final
 
-    def as_graph(self, graph=nx.Graph()):
+    def as_graph(self, graph=None):
         """Creates a graph of the last processed sequence. Returns a networkX graph."""
         # at this level it works but what if we have nested structures?
         # What is a graph if not a set of links? Why do not we put all into a graph?
+        if not graph:
+            graph = nx.Graph()
+
         for link in self.sequence:
             logging.info(link)
             (l, r) = link.value
             (ln, rn) = link.name
             logging.info ("Node: %s %s " % (l.name, str(l.shannon)))
-            graph.add_node(l.name, shannon=l.shannon)
+            graph.add_node(l.name, shannon=l.shannon, IC=l.IC)
             logging.info ("Node: %s %s " % (r.name, str(r.shannon)))
-            graph.add_node(r.name, shannon=r.shannon)
+            graph.add_node(r.name, shannon=r.shannon, IC=r.IC)
             logging.info ("Edge: %s %s %s " % (l.name, r.name, str(link.PMI)))
             graph.add_edge(l.name, r.name, pmi=link.PMI)
 

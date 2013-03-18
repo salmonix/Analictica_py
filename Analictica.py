@@ -32,8 +32,8 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 from Engines import Yuret
 Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
 
-link_graph = nx.Graph()
-text_graph = nx.DiGraph()
+# link_graph = nx.Graph()
+# text_graph = nx.DiGraph()
 
 counter = 0
 for title, s in elements.sentences.get_sentences_by_object():
@@ -41,10 +41,10 @@ for title, s in elements.sentences.get_sentences_by_object():
         continue
 
     Yur.process_sentence(s)
-    link_graph = Yur.as_graph(link_graph)
+    link_graph = Yur.as_graph()
 
-    text_graph = make_graph_with_attribute(text_graph, s)
+    # text_graph = make_graph_with_attribute(text_graph, s)
     nx.write_gexf(link_graph, '../ATU_4xx/' + title + '_link_graph.gexf', encoding='utf-8', prettyprint='True')
 
 
-nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')
+# nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')
