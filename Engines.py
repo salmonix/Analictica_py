@@ -2,7 +2,7 @@ from Elements import Atoms, Links
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.WARNING)
+logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 def get_engine(name, elements):
     if name == 'Yuret':
@@ -29,7 +29,7 @@ class Yuret(object):
         stringit = lambda x : str(x).strip('[]')
         self.sequence = data
 
-        logging.info('Sentence received : ' + stringit(data))
+        logging.info('Sentence received : ' + stringit([d.name for d in data]))
 
         for r in range(1, end):  # take the right element of the link
 
