@@ -1,4 +1,4 @@
-from aConfig import Config
+from Configuration import Corpora
 from Source import Corpus
 from Elements import Elements
 from Representations import Table
@@ -7,11 +7,16 @@ import networkx as nx
 
 from testHelpers import *
 
-Config = Config()
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 
-elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
-# elements = Elements(datasource=Corpus(source='test').tokenize_source())
+Config = Corpora()
+
+
+# elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
+elements = Elements(datasource=Corpus(source='test').tokenize_source())
 elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hooked into token processing
 
 # raw_input('RECALL TEXT')
@@ -39,7 +44,7 @@ counter = 0
 for title, s in elements.sentences.get_sentences_by_object():
     if len(s) < 2:
         continue
-
+    logging.info("\n -----------> TEXT: " + title)
     Yur.process_sentence(s)
     link_graph = Yur.as_graph()
 

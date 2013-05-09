@@ -2,7 +2,7 @@ import os
 import re
 import copy
 
-from aConfig import Config
+from Configuration import Corpora
 
 from NLP.Tokenizers import Tokenizer, Sentencer
 from NLP.Filters import Stopword
@@ -24,7 +24,7 @@ class Corpus(object):
 
     def __init__(self, source):
         self.title = source.lower()
-        self.source = Config().sources(source)
+        self.source = Corpora().sources(source)
 
     # this can be a decorator ( but I doubt we'll need that. This is a logical step closing a read_in process )
     def tokenize_source(self, sentencer=None,  # that is equal to none.

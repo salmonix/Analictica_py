@@ -2,8 +2,6 @@ from numpy import zeros, dtype
 from functools import partial
 import sys
 
-from aConfig import Config
-
 class Table(object):
 
     def __init__(self, tokens):
