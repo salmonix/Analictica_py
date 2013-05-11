@@ -1,16 +1,17 @@
 # a link of Borg borg borg
-
+import warnings
 import os.path
 
 class ConfigSource(object):
 
     # still can not manage composite source... :-(
-    def __init__(self, **kwarg):
+    def __init__(self, corpus, **kwarg):
         for (k, v) in kwarg.iteritems():
             self.__dict__['sourcetype'] = k
             for (k2, v2) in v.iteritems():
                 self.__dict__[k2] = v2
         self.runmode = None
+        self.corpus = corpus
 
     @property
     def path(self):
@@ -40,20 +41,21 @@ class ConfigSource(object):
         if os.path.exists(fpath):
             return fpath
         else:
-            assert "Not existing: " + fpath
+            # warnings.warn("Not existing: " + fpath)
+            raise IOError(fpath + " does not exist for corpus '" + self.corpus + "' of type '" + self.sourcetype + "'")
             return None
 
 
 class ConfigSources(object):
 
-    _sources = {'test' : {'Txt' : { 'path':'/home/salmonix/memdrive/Analictica.test_text' }},
+    _sources = {'test' : {'Txt' : { 'path':'/home/salmonix/memdrive/Analictica_py/Tests/Analictica.test_text' }},
                    'ATU_Motifchain' : {'ATU_Motifchain': {'path': '/home/salmonix/ATU_MASTER/ATU_Motifchain.txt',
                                                            'no_nlp' : True }},
                   }
     _shared_state = {}
 
     for k, v in _sources.iteritems():
-        _shared_state[k] = ConfigSource(**v)
+        _shared_state[k] = ConfigSource(k, **v)
 
     def __init__(self):
         self.__dict__ = self._shared_state
