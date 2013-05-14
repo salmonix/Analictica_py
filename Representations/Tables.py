@@ -17,10 +17,10 @@ class Table(object):
         and the attribute co_occurrence is used assuming that it contains the relevant data - eg. co_occurrence with other
         tokens, in a dictionary. So, it is used instead of iterating over token x token times and letting each token
         run this check internally."""
-        dim = self.tokens.idx  # space starts from 1, lists from 0
+        dim = len(self.tokens)  # space starts from 1, lists from 0
         table = zeros((dim, dim), dtype=float)  # the given tablespace is always overwritten
 
-        for xToken in self.tokens.tokens:
+        for xToken in self.tokens:
             yTokens = ''
             try:
                 # print(attribute)
@@ -50,13 +50,13 @@ class Table(object):
                 # print ('Indexes: ' + str(x) + ' : ' + str(xToken.co_occurrence))
 
                 for yTokenId in xToken.co_occurrence.keys():
-                    y = self.tokens.tokens[yTokenId].idx
-                    table[x][y] = fun(self.tokens.tokens[yTokenId])
+                    y = self.tokens[yTokenId].idx
+                    table[x][y] = fun(self.tokens[yTokenId])
 
             else:  # attribute
                 try:
                     for yTokenId in xToken.co_occurrence.keys():
-                        y = self.tokens.tokens[yTokenId].idx
+                        y = self.tokens[yTokenId].idx
                         table[x][y] = yMethod
                 except:
                     raise ValueError('Parameter method returns neither iterable nor function nor real attribute.' + str(yMethod))
@@ -70,7 +70,7 @@ class Table(object):
         # it will not work with ARRAYs  - we must write it immediately out to the passed object
 
         writer = WriteTable(**kwargs)
-        header = [ t.name for t in self.tokens.tokens]
+        header = [ t.name for t in self.tokens]
         writer.write(header)
 
         for i in range(1, len(header)):
