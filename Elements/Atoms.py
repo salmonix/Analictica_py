@@ -1,4 +1,6 @@
 from math import log
+from pprint import pprint
+# from sets import frozenset  # python3 type.
 
 class Atoms(object):
     """Container for the tokens, the nodes. Token container is not optimal for deletion because it maintains an array."""
@@ -53,9 +55,47 @@ class Atoms(object):
         return self.tokens[idx].freq
 
 
+    # todo : multiple possibilities to pass. It is possible only when Elements and Atoms are unified as
+    # both container and atomic object possibilities
+
+    def get_subset_by_attribute(self, kwarg):
+        """Example: 
+            elements.get_subset_by_attribute({ 'decorator' : 'hidden' })
+            elements.get_subset_by_attribute({ 'name' : [ ... ] })
+            elements.get_subset_by_attribute({ 'PMI' : lambda x : x < 0.14 and x > 6.21 })
+            can be iteratively 
+        """
+
+        subset = self.tokens
+        for attr, constraint in kwarg.items():
+            try:
+                if hasattr(constraint, '__iter__'):
+                    constraint = set(constraint)
+                    subset = [ i for i in subset if i.attr in constraint ]
+
+                elif type(constraint, 'function'):
+                    subset = [ i for i in subset if constraint(i.__dict__[attr]) ]
+
+                else:
+                    try:
+                        subset = [ i for i in subset if i.__dict__[attr] == constraint ]
+                    except:
+                        raise ValueError('Constraint is neither iterable, nor scalar, nor lambda.' + constraint)
+
+            except:
+                pprint(subset[0].__dict__)
+                raise ValueError('No attribute for Atom as "%s"' % attr)
+
+        return subset
+
+
 class Atom(object):
-    """Token object. The co_occurrence is a matter of definition."""
-    __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'value')
+    """Token object. The co_occurrence is a matter of definition.
+    S : the no of elements in the probability space
+    decorator: a special attribute of the element, eg. stopword
+    attribute: custon attributes
+    value = the name of the element"""
+    # __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'value', 'decorator')
     def __init__(self, name, idx, parent, freq=1.0):
         self.value = name
         self.idx = idx
