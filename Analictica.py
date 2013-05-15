@@ -4,6 +4,7 @@ from Elements import Elements
 from Representations import Table
 from Representations.Graph import make_graph_with_attribute
 import networkx as nx
+from pprint import pprint
 
 from testHelpers import *
 
@@ -26,30 +27,34 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 # raw_input('PMI')
 # print_PMI(elements.tokens)
 
-# table = Table(elements.tokens)
+# table = Table( elements.tokens.tokens)
 # table.build_table(method='IC')
 # table.write_formatted(file='../IC.csv', format='csv')
 
 # table.build_table(method='PMI')
 # table.write_formatted(file='PMI.csv', format='csv')
 
+# param = { }
+subset = elements.tokens.get_subset_by_attribute({'idx' : ['a', 'b'] })
+pprint(subset)
 
-from Engines import Yuret
-Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
 
-# link_graph = nx.Graph()
-# text_graph = nx.DiGraph()
-
-counter = 0
-for title, s in elements.sentences.get_sentences_by_object():
-    if len(s) < 2:
-        continue
-    logging.info("\n -----------> TEXT: " + title)
-    Yur.process_sentence(s)
-    link_graph = Yur.as_graph()
-
-    # text_graph = make_graph_with_attribute(text_graph, s)
-    nx.write_gexf(link_graph, '../ATU_4xx/' + title + '_link_graph.gexf', encoding='utf-8', prettyprint='True')
+# from Engines import Yuret
+# Yur = Yuret(elements.tokens)  # initialize the engine with the primal dataset
+#
+# # link_graph = nx.Graph()
+# # text_graph = nx.DiGraph()
+#
+# counter = 0
+# for title, s in elements.sentences.get_sentences_by_object():
+#     if len(s) < 2:
+#         continue
+#     logging.info("\n -----------> TEXT: " + title)
+#     Yur.process_sentence(s)
+#     link_graph = Yur.as_graph()
+#
+#     # text_graph = make_graph_with_attribute(text_graph, s)
+#     nx.write_gexf(link_graph, '../ATU_4xx/' + title + '_link_graph.gexf', encoding='utf-8', prettyprint='True')
 
 
 # nx.write_gexf(text_graph, '../Text_graph.gexf', encoding='utf-8', prettyprint='True')
