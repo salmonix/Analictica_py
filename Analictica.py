@@ -35,7 +35,7 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 # table.write_formatted(file='PMI.csv', format='csv')
 
 # param = { }
-subset = elements.tokens.get_subset_by_attribute({'idx' : ['a', 'b'] })
+subset = elements.tokens.get_subset_by_attribute({'name' : ['a', 'b'] })
 pprint(subset)
 
 

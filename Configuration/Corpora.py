@@ -1,6 +1,7 @@
 # a link of Borg borg borg
 import warnings
 import os.path
+from os import  getcwd
 
 class ConfigSource(object):
 
@@ -48,7 +49,7 @@ class ConfigSource(object):
 
 class ConfigSources(object):
 
-    _sources = {'test' : {'Txt' : { 'path':'/home/salmonix/memdrive/Analictica_py/Tests/Analictica.test_text' }},
+    _sources = {'test' : {'Txt' : { 'path': os.getcwd() + '/Tests/Analictica.test_text' }},
                    'ATU_Motifchain' : {'ATU_Motifchain': {'path': '/home/salmonix/ATU_MASTER/ATU_Motifchain.txt',
                                                            'no_nlp' : True }},
                   }

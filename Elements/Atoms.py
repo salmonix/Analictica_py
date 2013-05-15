@@ -54,10 +54,7 @@ class Atoms(object):
         self.tokens[idx].freq_add(num)
         return self.tokens[idx].freq
 
-
-    # todo : multiple possibilities to pass. It is possible only when Elements and Atoms are unified as
-    # both container and atomic object possibilities
-
+# TODO : the method names and the element names must be cleaned up !!!!
     def get_subset_by_attribute(self, kwarg):
         """Example: 
             elements.get_subset_by_attribute({ 'decorator' : 'hidden' })
@@ -71,7 +68,7 @@ class Atoms(object):
             try:
                 if hasattr(constraint, '__iter__'):
                     constraint = set(constraint)
-                    subset = [ i for i in subset if i.attr in constraint ]
+                    subset = [ i for i in subset if i.__dict__[attr] in constraint ]
 
                 elif type(constraint, 'function'):
                     subset = [ i for i in subset if constraint(i.__dict__[attr]) ]
@@ -93,11 +90,10 @@ class Atom(object):
     """Token object. The co_occurrence is a matter of definition.
     S : the no of elements in the probability space
     decorator: a special attribute of the element, eg. stopword
-    attribute: custon attributes
-    value = the name of the element"""
+    attribute: custon attributes"""
     # __slots__ = ('co_occurrence', 'name', 'freq', 'idx', 'S', 'attribute', 'value', 'decorator')
     def __init__(self, name, idx, parent, freq=1.0):
-        self.value = name
+        self.name = name
         self.idx = idx
         self.freq = freq
         self.co_occurrence = {}
@@ -106,10 +102,6 @@ class Atom(object):
 
     def freq_add(self, num=1):
         self.freq += num
-
-    @property
-    def name(self):
-        return self.value
 
     @property
     def Space(self):
@@ -173,3 +165,10 @@ class Atom(object):
 
     def PMI_with(self, B):
         return self.PMI(B)
+
+    def associate(self, element=None):
+        """Associate self to the given element. The association can be an
+        assignment or a rule ( method )."""
+        if element:
+            pass
+        # associate can be: an other label, a method or a value.
