@@ -29,7 +29,7 @@ class Tokenizer(object):
 
         if self.stopwords:
             tokens = self.tokenize(string)
-            return [ i for i in subset if i.__dict__[attr] not in self.stopwords ]
+            return [ i for i in tokens if i not in self.stopwords ]
         else:
             return self.tokenize(string)
 

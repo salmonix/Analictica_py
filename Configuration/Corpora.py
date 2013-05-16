@@ -2,6 +2,7 @@
 import warnings
 import os.path
 from os import  getcwd
+from Utils.File import check_path, get_path_iterator
 
 class ConfigSource(object):
 
@@ -21,37 +22,16 @@ class ConfigSource(object):
             raise '"path" attribute is missing for this source'
             return
 
-        path = self.__dict__['path']
-
-        if os.path.isdir(path):
-            try:
-                for f in os.listdir(path):
-                    checked = self._check_path(os.path.join(path, f))
-                    if checked:
-                        yield checked
-                    else:
-                        continue
-
-            except:
-                print(' We have some error... ?')
-        else:
-            yield self._check_path(path)
-
-    # this is to catch the missing path early at startup
-    def _check_path(self, fpath):
-        if os.path.exists(fpath):
-            return fpath
-        else:
-            # warnings.warn("Not existing: " + fpath)
-            raise IOError(fpath + " does not exist for corpus '" + self.corpus + "' of type '" + self.sourcetype + "'")
-            return None
+        return get_path_iterator(self.__dict__['path'])
 
 
+# TODO: no_nlp is awkward. it is better to explicitely say what I want..
 class ConfigSources(object):
 
     _sources = {'test' : {'Txt' : { 'path': os.getcwd() + '/Tests/Analictica.test_text' }},
                    'ATU_Motifchain' : {'ATU_Motifchain': {'path': '/home/salmonix/ATU_MASTER/ATU_Motifchain.txt',
                                                            'no_nlp' : True }},
+                '10tales': {'Txt': { 'path': os.path.expanduser('~') + '/DARANYI_MOTYO/LEGUJABB/10 tales' }}
                   }
     _shared_state = {}
 
