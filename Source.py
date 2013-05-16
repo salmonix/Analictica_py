@@ -28,14 +28,16 @@ class Corpus(object):
 
     def tokenize_source(self, sentencer=None,  # that is equal to none.
                               tokenizer=None,
-                              language=None):
+                              language=None,
+                              stopwords=None,
+                              ):
         """Returns an iterator of ( 'title', tokens[] ). Optional parameters are:
         sentencer(str) -> list or str. default: x -> x
         tokenizer(str) -> list of str. default: str.split()
         language(str)  -> additional parameter to the aboves. default: none. """
 
         self.sentencer = Sentencer(sentencer, language)
-        self.tokenizer = Tokenizer(tokenizer, language)
+        self.tokenizer = Tokenizer(tokenizer, language, stopwords)
 
         for (title, text) in self.read_data():
             if hasattr(self.source, 'no_nlp'):  # XXX we stop here for some reason

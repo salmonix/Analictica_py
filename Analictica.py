@@ -15,6 +15,13 @@ logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG
 
 Config = Corpora()
 
+import yaml
+
+filter_words = None
+with open('10Tales_1st_wordlist.yml', 'r') as f:
+    filter_words = yaml.load(f)
+
+elements = Elements(datasource=Corpus(source='test').tokenize_source(stopwords=filter_words['to_stop']))
 
 # elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
 elements = Elements(datasource=Corpus(source='test').tokenize_source())
@@ -35,7 +42,12 @@ elements.sentences.add_co_occurrences(elements.tokens)  # XXX this could be hook
 # table.write_formatted(file='PMI.csv', format='csv')
 
 # param = { }
-subset = elements.tokens.get_subset_by_attribute({'name' : ['a', 'b'] })
+# subset = elements.tokens.get_subset_by_attribute({'name' : ['a', 'b'] })
+
+
+
+subset = elements.tokens.get_subset_by_attribute({'name' : filter_words['to_index'] })
+
 pprint(subset)
 
 

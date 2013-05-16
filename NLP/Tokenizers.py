@@ -3,12 +3,18 @@ import nltk.data
 from nltk.tokenize.punkt import PunktWordTokenizer
 from nltk.tokenize import sent_tokenize  # this is the regexp based tokenizer
 
+"""We should consider two more cases:
+1. a method to handle the stopwords
+2. a possibility of getting pos tags parallel with the tokens.
+ The use of the second case is not really clear. Perhaps we should add metadata to the token and
+ store that way."""
 
 class Tokenizer(object):
     def __init__(self, tokenizer, language, stopwords=None):
         """tokenizer(str) -> list of str. default: str.split()
         language(str)  -> additional parameter to the aboves. default: none. """
 
+        self.stopwords = stopwords
         if not tokenizer:
             self.tokenize = lambda x : [ d for d in x.split() if d ]
             return
@@ -20,7 +26,14 @@ class Tokenizer(object):
             raise ValueError(tokenizer + " tokenizer not implemented")
 
     def get_tokens(self, string):
-        return self.tokenize(string)
+
+        if self.stopwords:
+            tokens = self.tokenize(string)
+            return [ i for i in subset if i.__dict__[attr] not in self.stopwords ]
+        else:
+            return self.tokenize(string)
+
+
 
 class Sentencer(object):
     """Initialized with a sentencer and language parameter it stores the language related sentencer.
