@@ -1,4 +1,5 @@
 from Elements import Elements
-from Atoms import Atoms, Atom
-from Links import Links, Link
+from Token import Token
+from Sequences import Sequences
+from Links import Links, Link  # this is something not really convincing
 

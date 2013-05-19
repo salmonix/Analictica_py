@@ -2,20 +2,8 @@ from math import log
 from Atoms import Atoms, Atom
 
 
-# CAVEAT: the sentence head token is hard coded as id 0
-class Elements(object):
-    """Object containing obj.tokens and obj.texts. Optional argument: 
-    datasource : iterator, that returns a 'tite', 'tokenlist' tuple"""
-
-    def __init__(self, datasource=None):
-        self.tokens = Atoms()
-        self.sentences = Sentences(self.tokens)
-        if datasource:
-            for (title, tlist) in datasource:
-                self.add_sentence_of_tokens(title, tlist)
-
-    def add_sentence_of_tokens(self, title, tokenlist):
-        """Convenience method to process a sentence into the text and token containers."""
+def add_sequence_of_tokens(self, title, tokenlist):
+        """Convenience method to process a sequence into the text and token containers."""
 
         self.sentences.add_text(title)
         tokenlist.insert(0, '_head_')
@@ -24,14 +12,15 @@ class Elements(object):
         self.sentences.add_token_ids([ t.idx for t in tokens])
 
 
+class Sequences(object):
+    """Sequences are an other concept of the universe. These are the visible phenomenae, the product of 
+    engines applying relations. The original input - for example text - is the starting sequence, but 
+    any graph can be a sequence. These are not entities, but phenomenae, a combination of different elements 
+    of rules and relations.
+    Every sequence must know iteritems() and nothing else matters."""
 
-class Sentences(object):
-    """Text container: stores the text transformed into sequences of token index numbers.
-    CAVEAT: at the current state the distinction: title  - text ( sentences ) is not clear."""
-
-    # TODO: in case of lots of texts it should be optimized
     def __init__(self, tokens):
-        self.text = {}
+        self.sequence = {}
         self.active = ''
         self.tokens = tokens
 
@@ -41,52 +30,53 @@ class Sentences(object):
         if source in self.text:
             return self.text[source]
 
-        self.text[source] = []
+        self.sequence[source] = []
         self.active = source
 
     def add_token_ids(self, idxs):
         self.text[ self.active ].append(idxs)
 
-    def get_text(self, title=[]):
+    def get_sequence(self, title=[]):
         """Returns a title, text list iterator -> tuple for the given text titles. If nothing is passed returns for all."""
 
         # XXX name changed : get_text
         if title == []:
-            title = self.text.keys()
+            title = self.sequence.keys()
             for t in title:  # this is each sentence list
-                yield (t, self.text[t])
+                yield (t, self.sequence[t])
 
 # these are copy-paste iterators but a. faster, b. I do not know the use cases
-    def get_sentences_by_id(self):
+    def get_senquences_by_id(self):
         """Returns a list of token id's the sentence is built from."""
-        for title, i in self.text.iteritems():
+        for title, i in self.sequence.iteritems():
             for s in i:
                 yield title, s
 
-    def get_sentences_by_object(self):
+    def get_sequences_by_object(self):
             """Returns a list of token id's the sentence is built from."""
             tokens = self.tokens.tokens
-            for title, i in self.text.iteritems():
+            for title, i in self.sequence.iteritems():
                 for s in i:
                     yield title, [ tokens[id] for id in s ]
 
-    def get_sentences_by_name(self):
+    def get_sequences_by_name(self):
                 """Returns a list of token id's the sentence is built from."""
                 tokens = self.tokens.tokens
-                for title, i in self.text.iteritems():
+                for title, i in self.sequence.iteritems():
                     for s in i:
                         yield title, [ tokens[id].name for id in s ]
 
     def add_co_occurrences(self, tokens):
         """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
-        Possibly other occurrences can be calculated here, like syntagmatic co-occurrences."""
+        It is important that co-occurrence may mean different things. At the moment we think that two elements 
+        appeare in the same sequence."""
 
-        tokens = tokens.tokens
+        tokens = token.tokens
 
         # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
-        for sentences in self.text.values():  # get the list of sentences
+        for sequences in self.text.values():  # get the list of sentences
 
-            for sen in sentences:  # iterate over the sentences
+            for sen in sequences:  # iterate over the sentences
              #   print (sen)
                 for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
 

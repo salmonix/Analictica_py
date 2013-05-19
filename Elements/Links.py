@@ -1,5 +1,5 @@
 from math import log
-from Atoms import Atoms, Atom
+import Token
 
 class Links(Atoms):
     """Links are joined Atoms. Their name is a tuple, and knows the source Tokens instance to maintain its position in the graph."""

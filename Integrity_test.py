@@ -13,24 +13,25 @@ import logging
 logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 
-Config = Corpora()
+Config = Corpora()  # initialize the a configuration instance
 
+"""This package is to run the new features on  a gives test set with all the unique parameters and outputs.
+The purpose of this program at the moment is to prove that the units are ok when glued together."""
 
-
-filterwords = file_slurp('/home/salmonix/DARANYI_MOTYO/LEGUJABB/10Tales_1st_wordlist.yml')
-
-print('to index: %i' % len(filterwords['to_index']))
+# print('to index: %i' % len(filterwords['to_index']))
 
 data_corpus = '10tales'
-if data_corpus == '10tales':
-    elements = Elements(datasource=Corpus(source=data_corpus).tokenize_source(stopwords=filterwords['to_stop']))
-else:
-    elements = Elements(datasource=Corpus(source=data_corpus).tokenize_source())
 
+elements = Elements(datasource=Corpus(source=data_corpus).tokenize_source())
+print(len(elements.tokens))
+# assert len(elements.tokens) ==
+
+
+# elements = Elements(datasource=Corpus(source=data_corpus).tokenize_source(stopwords=filterwords['to_stop']))
 
 # TODO: this could be hooked into token processing
 # so we do not have to parse the whole story through again.
-elements.sentences.add_co_occurrences(elements.tokens)
+# elements.sentences.add_co_occurrences(elements.tokens)
 
 # raw_input('RECALL TEXT')
 # recall_text(elements, by='name')
@@ -48,15 +49,13 @@ elements.sentences.add_co_occurrences(elements.tokens)
 
 # subset = elements.tokens.get_subset_by_attribute({'name' : ['a', 'b'] })
 
-subset = elements.tokens.get_subset_by_attribute({'name' : filterwords['to_index'] })
-
-print(len(elements.tokens.tokens))
-print(len(subset))
-
-subset = set([ x.name for x in subset ])
-for e in filter_words['to_index']:
-    if e not in subset:
-        print "Not found" + e
+# subset = elements.tokens.get_subset_by_attribute({'name' : filterwords['to_index'] })
+#
+#
+# subset = set([ x.name for x in subset ])
+# for e in filter_words['to_index']:
+#     if e not in subset:
+#         print "Not found" + e
 
 
 # from Engines import Yuret

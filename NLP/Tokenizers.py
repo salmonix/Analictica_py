@@ -2,6 +2,7 @@ import re
 import nltk.data
 from nltk.tokenize.punkt import PunktWordTokenizer
 from nltk.tokenize import sent_tokenize  # this is the regexp based tokenizer
+from sets import ImmutableSet
 
 """We should consider two more cases:
 1. a method to handle the stopwords
@@ -14,7 +15,7 @@ class Tokenizer(object):
         """tokenizer(str) -> list of str. default: str.split()
         language(str)  -> additional parameter to the aboves. default: none. """
 
-        self.stopwords = stopwords
+        self.stopwords = ImmutableSet(stopwords)
         if not tokenizer:
             self.tokenize = lambda x : [ d for d in x.split() if d ]
             return

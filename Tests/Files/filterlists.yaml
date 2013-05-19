@@ -1,0 +1,12 @@
+---
+  to_index:
+    - ring
+    - mordor
+    - shadow
+    - lord
+    - dakness
+    - king
+  to_stop:
+    - the
+    - all
+    - to

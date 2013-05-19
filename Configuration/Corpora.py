@@ -25,13 +25,16 @@ class ConfigSource(object):
         return get_path_iterator(self.__dict__['path'])
 
 
-# TODO: no_nlp is awkward. it is better to explicitely say what I want..
+# TODO: no_nlp is awkward. it is better to explicitly say what I want.
 class ConfigSources(object):
 
-    _sources = {'test' : {'Txt' : { 'path': os.getcwd() + '/Tests/Analictica.test_text' }},
+    _sources = {'test' : {'Txt' : { 'path': os.path.join(os.getcwd(), 'Tests', 'Files', 'Analictica.test_text'),
+                                    'filterwords' : os.path.join(os.getcwd(), 'Tests', 'Files', 'filterlists.yaml')
+                                    },
+                          },
                    'ATU_Motifchain' : {'ATU_Motifchain': {'path': '/home/salmonix/ATU_MASTER/ATU_Motifchain.txt',
                                                            'no_nlp' : True }},
-                '10tales': {'Txt': { 'path': os.path.expanduser('~') + '/DARANYI_MOTYO/LEGUJABB/10 tales' }}
+                '10tales': {'Txt': { 'path': os.path.join(os.path.expanduser('~'), 'DARANYI_MOTYO', 'LEGUJABB', '10 tales') }}
                   }
     _shared_state = {}
 
