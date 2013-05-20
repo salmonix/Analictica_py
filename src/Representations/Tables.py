@@ -84,6 +84,7 @@ class Table(object):
         return 1  # deal with the error cases
 
 
+# the effective writing should go into File.py
 # The writer for the table is not decided yet, but not generic.
 class WriteTable(object):
 

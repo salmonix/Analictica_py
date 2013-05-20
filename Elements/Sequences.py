@@ -2,22 +2,48 @@ from math import log
 from Atoms import Atoms, Atom
 
 
-def add_sequence_of_tokens(self, title, tokenlist):
+# can it be a  Builder class?
+
+def add_sequence_of_tokens(sequences, title, tokenlist):
         """Convenience method to process a sequence into the text and token containers."""
 
-        self.sentences.add_text(title)
+        sequences.add_text(title)
         tokenlist.insert(0, '_head_')
         tokens = self.tokens.add_tokenlist(tokenlist)
 
-        self.sentences.add_token_ids([ t.idx for t in tokens])
+        sequences.add_token_ids([ t.idx for t in tokens])
+
+def add_co_occurrences(sequences, tokens):
+        """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
+        It is important that co-occurrence may mean different things. At the moment we think that two elements 
+        appeare in the same sequence."""
+
+        tokens = token.tokens
+
+        # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
+        for sequences in sequences.text.values():  # get the list of sentences
+
+            for sen in sequences:  # iterate over the sentences
+             #   print (sen)
+                for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
+
+                    token = tokens[ sen[c] ]
+                    for i in range(1, len(sen)):  # this is the all with all loop
+                        if c != i:
+                            if sen[i] in token.co_occurrence:
+                                token.co_occurrence[ sen[i] ] += 1
+                            else:
+                                token.co_occurrence[ sen[i] ] = 1
+            #            print (" %d : %d " % (c, i))
+
 
 
 class Sequences(object):
-    """Sequences are an other concept of the universe. These are the visible phenomenae, the product of 
+    """Sequences are an other concept of the universe of communication. These are the visible phenomenae, the product of 
     engines applying relations. The original input - for example text - is the starting sequence, but 
-    any graph can be a sequence. These are not entities, but phenomenae, a combination of different elements 
+    any graph can be a sequence. These are not entities, but end-products, a combination of different elements 
     of rules and relations.
-    Every sequence must know iteritems() and nothing else matters."""
+    Every sequence must know iteritems() in the base class."""
 
     def __init__(self, tokens):
         self.sequence = {}
@@ -65,26 +91,3 @@ class Sequences(object):
                 for title, i in self.sequence.iteritems():
                     for s in i:
                         yield title, [ tokens[id].name for id in s ]
-
-    def add_co_occurrences(self, tokens):
-        """Adds the co-occurrence of two words. The co_occurrences attribute is the data for joined computations.
-        It is important that co-occurrence may mean different things. At the moment we think that two elements 
-        appeare in the same sequence."""
-
-        tokens = token.tokens
-
-        # bug? : in case : 'a a' co_occurrence is : 2, not 1 !!!!!
-        for sequences in self.text.values():  # get the list of sentences
-
-            for sen in sequences:  # iterate over the sentences
-             #   print (sen)
-                for c in range(1, len(sen)):  # skip the head token   # XXX no auto vivification
-
-                    token = tokens[ sen[c] ]
-                    for i in range(1, len(sen)):  # this is the all with all loop
-                        if c != i:
-                            if sen[i] in token.co_occurrence:
-                                token.co_occurrence[ sen[i] ] += 1
-                            else:
-                                token.co_occurrence[ sen[i] ] = 1
-            #            print (" %d : %d " % (c, i))

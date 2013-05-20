@@ -16,7 +16,7 @@ class Yuret(object):
 
     def __init__(self, atoms):
         self.link_candidates = []
-        self.links = Links(atoms)  # we collect the links into an elements list.
+        self.links = Links(atoms)  # we collect the links into an elements list.  XXX TODO: add it to sequences. Links is obsolete.
         self.sequence = None  # we store the current processed sentence
 
     def process_sentence(self, data):  # takes a sentence list

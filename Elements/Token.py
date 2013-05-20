@@ -2,6 +2,13 @@ from math import log
 from pprint import pprint
 # from sets import frozenset  # a python3 type.
 
+# at the moment this is a dummy root object that makes me a feeling that it is the Universe.
+class Root(object):
+    __slots__ = ('S')
+    def __init__(self):
+        self.S = 1.0
+
+
 class Token(object):
     """The Token class, with some philosophical notes. 
     The token is a Janus-faced thing. It can either be an element, that
@@ -15,9 +22,10 @@ class Token(object):
     The other is 'fuzzy', non directed relation. These are more a kind of probabilistic relations to the 
     elements beyond the explicite relations in the given concept space. What does it mean?
     If 'a' element is associated with 'b' as an is_a relationship, then their probability does not count and the 
-    'distance' of the two tokens are the steps of reaching from one point to the other. We predeclared a concept and 
+    'distance' of the two tokens are constantly 0 through the inheritance tree upwards. 
     However, if that association is non-existant in the is_a graph, then we still can ask if 'a' is_a 'c' ? 
-    Now, the answer lies if 'c' is in the probabilistic vicinity of some 'b'... Say, 'yes, something close (75%)."""
+    Now, the answer lies if 'c' is in the probabilistic vicinity of some 'b'... Say, 'yes, something close (75%).
+    I guess this kind of behaviour can be detected daily."""
 
     __slots__ = ('active', 'idx', 'tokens', 'names', 'S', 'freq', 'co_occurrence', 'attribute', '_associates', 'parent')
     _lookup = {}
@@ -30,17 +38,19 @@ class Token(object):
         """The container aspect of the Token class. The methods here are acting on the internal
         list attribute and on possibly multiple elements in it."""
         # container attributes
-        defaults = { 'active':[],
-                     'idx': 0,
-                     'tokens': [],
-                     'names':{},
-                     'S':1.0,
-                     'name':name,  # atomics
-                     'parent': Root(),
-                     'freq':1.0,
-                     'co_occurrence':{},
-                     'attribute':{},
-                     '_associates': {} }
+        defaults = {  # atomic attributes. These
+                    # also :name . This is mandatory.
+                    'idx': 0,  # TODO: this should be reconsidered - the idx for the container should be len(tokens), this should be idx
+                    'parent': Root(),
+                    'freq':1.0,
+                    'co_occurrence':{},
+                    'attribute':{},
+                    '_associates': {},
+                    'active':[],  # container attributes: the associate type that is relevant. XXX not sure if it is ok this way
+                    'tokens': [],  # a simple id -> token lookup. at the moment this is not deletion friendly.
+                    'names':{},  # a name -> id lookup. This lookup might be optimised, but we need a two way lookup
+                    'S':1.0,  # the numbers of element related to the list of tokens
+                     }
 
         for k, v in defaults.iteritems():
             try:
@@ -49,7 +59,7 @@ class Token(object):
                 else:
                     self.__slots__[_lookup[k]] = v
             except:
-                raise Error('Something is wrong')
+                raise Error('Something is wrong')  # not too talkative, is it?
 
 
     # add_tokenlist
@@ -213,5 +223,3 @@ class Token(object):
             new_func = lambda x : x
 
         setattr(self, assoc, to_this)
-
-
