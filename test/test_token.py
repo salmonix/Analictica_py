@@ -3,6 +3,7 @@ import unittest
 from Elements import Token
 
 
+""" I have to admit the the thing I most hate in Python is the test system... Perl's Test::More is tooooo comfortable...."""
 class CreationAndBasicTokenMethods(unittest.TestCase):
 
     # Only use setUp() and tearDown() if necessary
