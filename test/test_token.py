@@ -9,7 +9,7 @@ class CreationAndBasicTokenMethods(unittest.TestCase):
     # Only use setUp() and tearDown() if necessary
 
     def setUp(self):
-        root = Root()
+        root = Token()
         root.S = 3
         self.input = ({'name':'Ghani', 'freq':3.0, 'parent':root},
                      {'name':'Irulan', 'freq':1.0, 'parent':root},

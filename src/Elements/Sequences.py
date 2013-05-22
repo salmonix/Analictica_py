@@ -1,5 +1,5 @@
 from math import log
-from Atoms import Atoms, Atom
+import Token
 
 
 # can it be a  Builder class?
