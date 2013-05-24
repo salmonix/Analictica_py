@@ -1,6 +1,7 @@
 import re
+import string
 import nltk.data
-from nltk.tokenize.punkt import PunktWordTokenizer
+# from nltk.tokenize.punkt import PunktWordTokenizer
 from nltk.tokenize import sent_tokenize  # this is the regexp based tokenizer
 
 """We should consider two more cases:
@@ -12,24 +13,25 @@ from nltk.tokenize import sent_tokenize  # this is the regexp based tokenizer
 class Tokenizer(object):
     def __init__(self, tokenizer, language, stopwords=None):
         """tokenizer(str) -> list of str. default: str.split()
-        language(str)  -> additional parameter to the aboves. default: none. """
+        language(str)  -> additional parameter to the aboves. default: none. 
+        Note: the default tokenizer is a stone-axe tokenizer, as blindly removing all the punctuations and 
+        splitting on \s. This will naturally destroy abbreviations, for example."""
 
         self.stopwords = stopwords
         if not tokenizer:
-            self.tokenize = lambda x : [ d for d in x.split() if d ]
+            self.tokenize = lambda s : [ d for d in  s.translate(string.maketrans(" ", " "), string.punctuation).split() if d ]
             return
         # try to load the non default tokenizers
         try:
             if tokenizer == 'PunktWord':
-                self.tokenize = PunktWordTokenizer().tokenize
+                self.tokenize = PunktWordTokenizer()
         except:
             raise ValueError(tokenizer + " tokenizer not implemented")
 
-    def get_tokens(self, string):
-
+    def get_tokens(self, sequence):
         if self.stopwords:
-            tokens = self.tokenize(string)
-            return [ i for i in tokens if i not in self.stopwords ]
+            tokens = self.tokenize(sequence)
+            return [ string.strip(i, string.punctuation) for i in tokens if i not in self.stopwords ]
         else:
             return self.tokenize(string)
 

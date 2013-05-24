@@ -12,6 +12,8 @@ import logging
 logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 
+# TODO: Create an overall documentation
+
 Config = Corpora()
 
 import yaml
@@ -23,12 +25,17 @@ with open('/home/salmonix/DARANYI_MOTYO/LEGUJABB/10Tales_1st_wordlist.yml', 'r')
 elements = Elements(datasource=Corpus(source='10tales').tokenize_source(stopwords=filter_words['to_stop']))
 
 # elements = Elements(datasource=Corpus(source='ATU_Motifchain').tokenize_source())
-elements = Elements(datasource=Corpus(source='test').tokenize_source())
+# elements = Elements(datasource=Corpus(source='test').tokenize_source())
 
 # XXX this could be hooked into token processing
 # so we do not have to parse the whole story throught again.
 # TODO: I guess sentences are only a hierarchy of sequences, so it should be rewritten
-elements.sentences.add_co_occurrences(elements.tokens)
+elements.sentences.add_co_occurrences(elements.tokens)  # it is
+
+# pprint (elements.tokens.tokens)
+
+for i in elements.tokens.tokens:
+    print(i.name)
 
 # raw_input('RECALL TEXT')
 # recall_text(elements, by='name')
@@ -50,7 +57,7 @@ elements.sentences.add_co_occurrences(elements.tokens)
 
 subset = elements.tokens.get_subset_by_attribute({'name' : filter_words['to_index'] })
 
-pprint(subset)
+# pprint(subset)
 
 
 # from Engines import Yuret
