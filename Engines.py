@@ -2,7 +2,7 @@ from Elements import Atoms, Links
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
+logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.INFO)
 
 def get_engine(name, elements):
     if name == 'Yuret':

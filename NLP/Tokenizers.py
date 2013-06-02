@@ -1,8 +1,5 @@
 import re
 import string
-import nltk.data
-# from nltk.tokenize.punkt import PunktWordTokenizer
-from nltk.tokenize import sent_tokenize  # this is the regexp based tokenizer
 
 """We should consider two more cases:
 1. a method to handle the stopwords
@@ -19,22 +16,37 @@ class Tokenizer(object):
 
         self.stopwords = stopwords
         if not tokenizer:
-            self.tokenize = lambda s : [ d for d in  s.translate(string.maketrans(" ", " "), string.punctuation).split() if d ]
+            tokeRex = re.compile(r"[\s%s]+" % string.punctuation)  # split on punctuation and whitespace. It means no abbreviations, for example
+            self.tokenize = lambda s : tokeRex.split(s)
             return
+
         # try to load the non default tokenizers
         try:
-            if tokenizer == 'PunktWord':
+            if tokenizer == 'PunktWord':  # this if-elif-else construct is very explicite but on intent
+                try:
+                    import nltk.data
+
+                except:
+                    print('% tokenizer can not be imported')
                 self.tokenize = PunktWordTokenizer()
+            else:
+                raise ValueError(tokenizer + 'is not implemented.')
+
         except:
             raise ValueError(tokenizer + " tokenizer not implemented")
 
+
     def get_tokens(self, sequence):
+
         if self.stopwords:
             tokens = self.tokenize(sequence)
-            return [ string.strip(i, string.punctuation) for i in tokens if i not in self.stopwords ]
+            from pprint import pprint
+            print(' ------------------ ')
+            pprint(tokens)
+            return [ i for i in tokens if i not in self.stopwords ]  # we do not remove punct
         else:
-            return self.tokenize(string)
-
+            tokens = self.tokenize(sequence)
+            return tokens
 
 
 class Sentencer(object):
@@ -48,31 +60,33 @@ class Sentencer(object):
     def __init__(self, sentencer, language):
 
         if not sentencer:
-            self._sentencer = lambda x : [ d for d in x.split('\n') if d ]
+            self._sentencer = lambda x : [ x ]
             return
 
-        # try to load the non default sentencers
+        # try to load the non default sequencers
+        # self._sentencer = lambda x : [ d for d in x.replace('\n', ' ') ] # reuse?
         languages = ['english']
         if language in languages:
             self.language = language
         else:
             raise ValueError('Language "', language, '" not implemented')
 
-        # initialize the sentencer TODO: make it a hash switch
         try:
             if sentencer == 'punkt':  # here we load the picke learner.
-                self.sentencer = nltk.data.load('tokenizers/punkt/' + language + '.pickle')
+                try:
+                    from nltk.tokenize import sent_tokenize  # XXX: this is unlcear what it is doing exactly
+                    self.sentencer = nltk.data.load('tokenizers/punkt/' + language + '.pickle')
+                except:
+                    print(sentencer + 'can not be imported ')
+                    return None
 
         except:
             raise ValueError('Sentencer: "' + sentencer + '" has problems or not implemented')
 
         self.data = []
 
-    def process(self, string):
-        if self._sentencer:
-            return self._sentencer(string)
+    def process(self, sequence):
         """ Takes a string and returns a list of sentences. Non-comma punctuation is turned into . and whitespaces are removed. """
-        e = Sentencer.normal_punct.sub(' .', string)
-        e = Sentencer.rm_noise.sub(' ', e)
-        # make a factory here using self.sentencer
-        return self.sentencer.tokenize(e)
+        if self._sentencer:
+            return self._sentencer(sequence)
+
