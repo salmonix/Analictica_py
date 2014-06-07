@@ -2,12 +2,17 @@ from numpy import zeros, dtype
 from functools import partial
 import sys
 
+from WriteMatrices import WriteTable
+
 class Table(object):
 
     def __init__(self, tokens):
         self.tokens = tokens
 
 
+    # XXX the indexing method is bad. If we remove an element the indexing should also move,
+    # so we should build an internal lookup _first_. This should be an object because I guess
+    # the problem is more general that this module.
     # simple tables
     def build_table(self, method):
         """Simple tables : takes an attribute of key:value type, where
@@ -37,12 +42,12 @@ class Table(object):
                 try:
                     for y, v in yMethod.items():
                         # print ("x: %2d y: %2d -> %3d" % (x, y, v))
-                        table[x][y] = v
+                         table[x][y] = v
                 except:
-                    next
+                    ne xt
 
             elif hasattr(yMethod, '__call__'):  # callable
-                try:
+                try: 
                     fun = partial(yMethod)  # not faster but clearer
                 except:
                     raise ValueError('Unable to get partial function from method ' + str(method))
@@ -53,16 +58,13 @@ class Table(object):
                     y = self.tokens[yTokenId].idx
                     table[x][y] = fun(self.tokens[yTokenId])
 
-            else:  # attribute
-                try:
-                    for yTokenId in xToken.co_occurrence.keys():
-                        y = self.tokens[yTokenId].idx
-                        table[x][y] = yMethod
-                except:
-                    raise ValueError('Parameter method returns neither iterable nor function nor real attribute.' + str(yMethod))
+            else:  # attribute - make it ordered.
+                for yTokenId in xToken.co_occurrence.keys():
+                    y = self.tokens[yTokenId].idx
+                    table[0][x] = yMethod
 
         self.table = table
-        return table
+        return table 
 
 
     def write_formatted(self, **kwargs):  # takes also : target object
@@ -84,37 +86,4 @@ class Table(object):
         return 1  # deal with the error cases
 
 
-# the effective writing should go into File.py
-# The writer for the table is not decided yet, but not generic.
-class WriteTable(object):
 
-    def __init__(self, format='csv', target=None, file=None):
-        # writers
-        if target == 'stdout':
-            self.target = sys.stdout
-        elif file:
-
-            try:
-                self.target = open(file, 'w')
-            except:
-                self.target.close()
-                raise IOError
-
-        else:
-            raise ValueError('Wrong target parameter passed')
-
-        # formatters
-        if format == 'csv':
-            self.formatter = lambda row : ','.join([ str(i) for i in row ]) + "\n"
-        elif format == 'table':
-            self.formatter = lambda row : row  # TODO implement a pretty-printer
-        else:
-            raise ValueError('Wrong format is passed: ' + format)
-
-    def write(self, row=[]):
-        line = self.formatter(row)
-        self.target.write(line)
-
-    def close(self):
-        self.target.close
-        return
