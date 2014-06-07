@@ -13,13 +13,8 @@ import logging
 logging.basicConfig(stream=sys.stderr, format='%(message)s', level=logging.DEBUG)
 
 
-Config = Corpora()
+CorpusObject = Corpus('test')
 
-
-
-filterwords = file_slurp('/home/salmonix/DARANYI_MOTYO/LEGUJABB/10Tales_1st_wordlist.yml')
-
-print('to index: %i' % len(filterwords['to_index']))
 
 data_corpus = '10tales'
 if data_corpus == '10tales':

@@ -1,82 +1,121 @@
-import os.path
-import yaml
+import os
+
+from yaml import load, dump
+
+try: 
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader as Loader, Dumper as Dumper
+
+from Configuration import get_configuration
+
+_files_configuration = Configuration('iotypes')
+
+def iter_files(search_path, pattern, pathsep=os.pathsep):
+     """ Given a search path, yield all files matching the pattern."""
+     
+     if os.path.isfile(search_path):
+         yield search_path
+         
+     for path in search_path.split(pathsep):
+         for match in glob.glob(os.path.join(path, pattern)):
+             yield match
 
 
-# also make here a file opener with the necessary error messages
+def open_file(fpath,**kwargs):
+    """Ambitiously tries to open any file returning a filehandler"""
+    
+    ext = fpath[ fpath.rfind('.')+1 : ] # get the extension
+    mode = ''
+    
+    try:
+        mode = kwargs['mode']
+    except:
+        mode='r'
+        
+    try:
+        mod = None
+        if ext in kwargs['extensions'][ext]:
+            mod = kwargs['extensions'][ext]
+        else:
+            print('file extension %s is not recognized. trying "txt" ' % ext )
+            mod = 'txt'
 
-def check_path(fpath, *args):
-    """Checks for the existence of a path. The arguments are joined into one path string."""
+        # we make yaml a default format as it is need to load all the configuration data that is in yaml
+        if mod not in ['yaml', 'yml']:
 
-    if args:
-        fpath = os.path.join(fpath, *args)
+            if mod in _files_configuration.filetypes:
+                # get opener
+                opener = _files_configuration.filetypes[mod]
 
-    if os.path.exists(fpath):
-        return fpath
-    else:
-        # warnings.warn("Not existing: " + fpath)
-        raise IOError(fpath + " does not exist for corpus '" + self.corpus + "' of type '" + self.sourcetype + "'")
+        with open(fpath,mode) as fh:       
+            return fh
+        
+    except:
+        raise IOError('Unable to open %s' %(fpath ) )
         return None
 
+def check_path(fpath, *args):
+     """Checks for the existence of a path. The arguments are joined into one path string."""
 
-def get_path_iterator(path):
-    """Takes a path and if exists returns an iterator with the files. If path is a file, then 
-    the iterator iterates only one element."""
+     if os.path.exists(fpath):
+         return fpath
+     else:
+         # warnings.warn("Not existing: " + fpath)
+         raise IOError("{} does not exist.".format(fpath))
+         return None
 
-    if os.path.isdir(path):
+
+class File(object):
+    """The file wrapper returning file iterator with guessing the correct access to the given file.
+    
+    The guessing uses the file-type indicator in the following order:
+    - passed in kwargs[extension]
+    - using the file extension and matching it with the content of config/iotypes.yaml
+    - falling back to simple txt type
+    
+    """
+    __slots__=('fpath','fh','filelist','_pointer')
+    
+    def __init__(self,fpath,*args,**kwargs):
+        """ constructor. the *args parameters are joined, the kwargs[extension] is used for custom idenfification of the file-type."""
+        fpath = check_path(fpath,*args)
+
+        if not path:
+            return None
+
+        if os.path.isdir(fpath):
+            self.filelist = os.walk(fpath)
+        else:
+            self.filelist = [ fpath ]
+        
+        self.active_file = self._get_active_file()
+        self.active_fh = open_file(self.active_file)
+
+    def __iter__(self):
+
         try:
-            for f in os.listdir(path):
-                checked = check_path(path, f)
+            line = self.active_fh.readline()
 
-                if checked:
-                    yield checked
-                else:
-                    print('LOG: %s %s does not exists' % (path, f))
-                    continue
-
-        except:
-            print(' We have some error... ?')
-    else:
-        yield check_path(path)
-
-
-# also need csv writing possibly replace the csv writer in Representations.Tables
-def write_file(text, filename, writemode='w', type=None):
-    """Writes out the passed text to the filename. If 'text' is an array, it is treated as an array of strings.
-    Optional parameter: writemode ='a'(append), default: 'w' """
-
-    if not type:
-       type = os.path.splitext(filename)[1]
-
-    with open(filename, writemode) as file:
-
-        if type == 'yaml' or type == 'yml':
-            file.write(yaml.dump(text))
-
-        elif type == "txt":
-
-            if hasattr(text, '__iter__'):
-                file.write("\n".join(text))
+            if line:
+                yield line
             else:
-                file.write(text)
+                while True:
+                    try:
+                        self.active_file = self._get_active_file()
+                    except:
+                        print('Filelist is exhausted.') # info loglevel
+                        yield None
+                
+                    self.active_fh = open_file(self.active_file)
+                    line = self.active_fh.readline()
 
-    file.close()
+                    if line:
+                        yield line 
+                
+        except:
+            raise IOError
 
-
-# TODO: we may add some other possibilities to read csv format after suffix recognition
-def file_slurp(filename, type=None):
-   """Reads in the string of the given filename.
-   It guesses the type from the extension, unless the optional parameter 'txt' overwirtes it."""
-
-   if not type:
-       type = os.path.splitext(filename)[1]
-
-   data = None
-   with open(filename, 'r') as file:
-
-       if type == 'txt':
-           data = file.read()
-       elif type == 'yaml' or type == 'yml':
-           data = yaml.load(file)
-
-   file.close()
-   return data
+    def _get_active_file(self):
+        for f in self.filelist:
+            yield f

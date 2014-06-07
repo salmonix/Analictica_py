@@ -1,0 +1,28 @@
+---
+  Sources:
+    full_example: 
+      File:
+        dirs:
+          dir1: [file1, file2]
+          dir2: ''
+        filetypes:
+          old_version: [txt,ATU_OldTypes]
+          db: [SQLite3, ATU_Types]
+          d2: [pickle]
+      DatabaseConnection: [ databaseName ]
+      Formatter: ATU_Types
+  test:
+    File:
+      dirs:
+        'eval:os.path.join(os.getcwd(), "Tests", "Files")': [ 'Analictica.test_text' ] # need a better idea for dynamic storage
+    Processing: 
+        - filter: 'filterlists.yaml'
+        - split:  'NLP'
+  'ATU_Motifchain':
+    File:
+      dirs:
+        '/home/salmonix/ATU_MASTER/': ['ATU_Motifchain.txt']
+  '10tales':
+    File:
+      dirs:
+        "eval:os.path.join(os.path.expanduser('~'), 'DARANYI_MOTYO', 'LEGUJABB')": [ '10 tales ']

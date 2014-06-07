@@ -1,0 +1,7 @@
+---
+  filetypes:
+    txt: 'open'
+    yaml:'yaml'
+    csv: 'open'
+    sqlite:'PySQLite'
+    
